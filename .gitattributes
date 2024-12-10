@@ -1,0 +1,9 @@
+* text=auto
+
+# Treat files as binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.zip binary
+*.pdf binary

@@ -1,0 +1,61 @@
+# Node.js / React
+node_modules/
+build/
+dist/
+.env
+.npm/
+yarn.lock
+package-lock.json
+
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.Python
+env/
+venv/
+ENV/
+*.env
+pip-log.txt
+pip-delete-this-directory.txt
+
+
+# Flask
+instance/
+*.db
+*.sqlite3
+
+
+# Visual Studio Code
+.vscode/
+.history/
+
+
+# PyCharm
+.idea/
+*.iml
+workspace.xml
+tasks.xml
+usage.statistics.xml
+.idea_modules/
+scratch/
+.idea/*
+
+
+# Logs
+logs/
+*.log
+*.out
+*.err
+
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.~lock.*
+*.bak
+*.tmp
