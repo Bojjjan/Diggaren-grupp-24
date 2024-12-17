@@ -1,92 +1,44 @@
+from dataclasses import dataclass, field, asdict
+from typing import Optional, Dict
+
+@dataclass
 class Track:
-    def __init__(self):
-        self._song_name = None
-        self._song_img = None
-        self._artist_name = None
-        self._song_stop = None
-        self._song_start = None
-        self._channel_name = None
-        self._channel_color = None
-        self._channel_img = None
-        self._channel_id = None
+    song_title: Optional[str] = None
+    album_image: Optional[str] = None
+    artist_name: Optional[str] = None
+    song_stop: Optional[int] = None
+    song_start: Optional[int] = None
+    channel_name: Optional[str] = None
+    channel_color: Optional[str] = None
+    channel_img: Optional[str] = None
+    channel_id: Optional[str] = None
 
-    # song_name
-    @property
-    def song_name(self):
-        return self._song_name
+    def to_dict(self) -> Dict[str, Optional[str]]:
+        """
+        Convert the Track object to a dictionary.
 
-    @song_name.setter
-    def song_name(self, value):
-        self._song_name = value
+        Returns:
+            Dict[str, Optional[str]]: A dictionary representation of the Track object.
+        """
+        return {
+            "song": self.song_title,
+            "artist": self.artist_name,
+            "album_image": self.album_image,
+        }
 
-    # song_img
-    @property
-    def song_img(self):
-        return self._song_img
+    @classmethod
+    def from_dict(cls, track_dict: Dict[str, str]) -> "Track":
+        """
+        Create a Track object from a dictionary.
 
-    @song_img.setter
-    def song_img(self, img):
-        self._song_img = img
+        Args:
+            track_dict (Dict[str, str]): A dictionary containing track information.
 
-    # artist_name
-    @property
-    def artist_name(self):
-        return self._artist_name
-
-    @artist_name.setter
-    def artist_name(self, value):
-        self._artist_name = value
-
-    # song_stop
-    @property
-    def song_stop(self):
-        return self._song_stop
-
-    @song_stop.setter
-    def song_stop(self, value):
-        self._song_stop = value
-
-    # song_start
-    @property
-    def song_start(self):
-        return self._song_start
-
-    @song_start.setter
-    def song_start(self, value):
-        self._song_start = value
-
-    # channel_name
-    @property
-    def channel_name(self):
-        return self._channel_name
-
-    @channel_name.setter
-    def channel_name(self, value):
-        self._channel_name = value
-
-    # channel_color
-    @property
-    def channel_color(self):
-        return self._channel_color
-
-    @channel_color.setter
-    def channel_color(self, value):
-        self._channel_color = value
-
-    # channel_img
-    @property
-    def channel_img(self):
-        return self._channel_img
-
-    @channel_img.setter
-    def channel_img(self, value):
-        self._channel_img = value
-
-    # channel_id
-    @property
-    def channel_id(self):
-        return self._channel_id
-
-    @channel_id.setter
-    def channel_id(self, value):
-        self._channel_id = value
+        Returns:
+            Track: A new Track object created from the dictionary.
+        """
+        return cls(
+            song_title=track_dict.get("song"),
+            artist_name=track_dict.get("artist"),
+            album_image=track_dict.get("album_image"),
+        )
