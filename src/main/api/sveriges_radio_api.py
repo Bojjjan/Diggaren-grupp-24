@@ -1,5 +1,5 @@
 from src.main.models.track import Track
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 
 
@@ -21,11 +21,16 @@ class SvergiesRadioApi:
 
     def get_channel_music_history(self, channel_id):
         music_history_list = []
+        start_date = (datetime.now().strftime('%Y-%m-%d'))
+        end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+        start_date = (start_date+"T00:00:00Z")
+        end_date = (end_date+"T00:00:00Z")
         params = {
-            "pagination": "false",
-            "format": "JSON",
-            "id": channel_id,
-            "startdatetime": datetime.now().strftime("%Y-%m-%d"),
+            "pagination":"false",
+            "format":"JSON",
+            "id":channel_id,
+            "startdatetime":start_date,
+            "endDateTime":end_date
         }
 
         try:
@@ -36,7 +41,7 @@ class SvergiesRadioApi:
             for song in data["song"]:
                 newtrack = Track()
                 newtrack.channel_id = channel_id
-                newtrack.song_name = song["title"]
+                newtrack.song_title = song["title"]
                 newtrack.artist_name = song["artist"]
 
                 newtrack.song_start = self._microsoft_date_converter(song["starttimeutc"])
@@ -118,8 +123,8 @@ class SvergiesRadioApi:
             print("| Name:   ", t.channel_name)
             print("|")
             print("| Song:   ", t.song_title)
-            print("| Artist: ", t.artist_name)
-            print("| Start:  ", t.song_start)
+            print("| Artist:  ", t.artist_name)
+            print("| Start:   ", t.song_start)
             print("| Stop:   ", t.song_stop)
             print("|")
             print("| Color:  ", t.channel_color)
