@@ -3,7 +3,7 @@ from datetime import datetime
 import requests
 
 
-class sveriges_radio_api:
+class SvergiesRadioApi:
     def __init__(self):
         self._track_list = []
         self._URL =  "https://api.sr.se/api/v2"
@@ -16,7 +16,6 @@ class sveriges_radio_api:
         self._track_list.clear()
         self._get_all_live_music()
         self._get_all_channel_information()
-        self._debugg_print(self._track_list)
         return self._track_list
 
 
@@ -44,7 +43,6 @@ class sveriges_radio_api:
                 newtrack.song_stop = self._microsoft_date_converter(song["stoptimeutc"])
                 music_history_list.append(newtrack)
 
-            self._debugg_print(music_history_list)
             return music_history_list
 
         except requests.exceptions.RequestException as e:
@@ -98,7 +96,7 @@ class sveriges_radio_api:
                     if not skip:
                         newtrack = Track()
 
-                        newtrack.song_name = song["title"]
+                        newtrack.song_title = song["title"]
                         newtrack.artist_name = song["artist"]
                         newtrack.channel_id = channel["id"]
                         newtrack.channel_name = channel["name"]
@@ -108,18 +106,18 @@ class sveriges_radio_api:
                 print(e)
 
         except requests.exceptions.RequestException as e:
-            print(f"Ett fel inträffade: {e}")
+            print(e)
 
 
 
 
-    def _debugg_print(self, list):
+    def debugg_print(self, list):
         for t in list:
             print("#")
             print("| ID:     ", t.channel_id)
             print("| Name:   ", t.channel_name)
             print("|")
-            print("| Song:   ", t.song_name)
+            print("| Song:   ", t.song_title)
             print("| Artist: ", t.artist_name)
             print("| Start:  ", t.song_start)
             print("| Stop:   ", t.song_stop)
