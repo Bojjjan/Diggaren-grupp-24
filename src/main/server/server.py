@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, Response
 
 from main.api.sveriges_radio_api import SvergiesRadioApi
 from main.api.SpotifyAPI import SpotifyAPI
@@ -11,10 +11,14 @@ spotifyAPI = SpotifyAPI()
 def get_channels():
     channels = srAPI.get_all_channels()
 
+    if channels is None:
+        return "500 : Internal Server Error", 500
+
     for track in channels:
         track = spotifyAPI.get_album_image_for_track(track)
 
-    return jsonify(channels)
+    return jsonify(channels), 200
+
 
 @app.route("/")
 def hello_world():
