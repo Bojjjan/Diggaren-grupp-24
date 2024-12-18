@@ -1,4 +1,4 @@
-from src.main.models.track import Track
+from main.models.track import Track
 from datetime import datetime, timedelta
 import requests
 
