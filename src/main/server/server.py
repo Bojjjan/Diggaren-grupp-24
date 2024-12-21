@@ -30,4 +30,9 @@ def hello_world():
     return "<p>Diggaren API!</p>"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    debug_status = False
+
+    if len(sys.argv) > 1:
+        debug_status = True
+
+    app.run(debug=debug_status)

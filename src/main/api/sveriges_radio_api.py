@@ -1,11 +1,23 @@
+from main.models import track
 from main.models.track import Track
 from datetime import datetime, timedelta
+from typing import List
 import requests
 
 
 class SvergiesRadioApi:
+    """
+    A class to interact with the Sveriges Radio API.
+
+    This class provides methods to retrieve live music and channel information
+    from the Sveriges Radio API.
+    """
+
     def __init__(self):
-        self._track_list = []
+        """
+        Initialize the SvergiesRadioApi class.
+        """
+        self._track_list: List[track] = []
         self._URL =  "https://api.sr.se/api/v2"
         self._PARAMS = {
             "pagination": "false",
@@ -13,6 +25,16 @@ class SvergiesRadioApi:
         }
 
     def get_all_channels(self):
+        """
+        Retrieve all channels and their live music information.
+
+        This method clears the current track list, retrieves live music and
+        channel information, and returns the updated track list.
+
+        Returns:
+            list: A list of Track objects containing channel and live music information.
+        """
+
         self._track_list.clear()
         self._get_all_live_music()
         self._get_all_channel_information()
@@ -20,6 +42,18 @@ class SvergiesRadioApi:
 
 
     def get_channel_music_history(self, channel_id):
+        """
+        Retrieve the music history for a specific channel.
+
+        This method retrieves the music history for the specified channel
+        within the current day.
+
+        Args:
+            channel_id (int): The ID of the channel.
+
+        Returns:
+            list: A list of Track objects containing the music history for the channel.
+        """
         music_history_list = []
         start_date = (datetime.now().strftime('%Y-%m-%d'))
         end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
@@ -57,6 +91,15 @@ class SvergiesRadioApi:
 
 
     def _microsoft_date_converter(self, time_text):
+        """
+        Convert a Microsoft date string to a formatted date string.
+
+        Args:
+            time_text (str): The Microsoft date string.
+
+        Returns:
+            str: The formatted date string.
+        """
         time_ms = time_text[6:-2]
         time_s = (int(time_ms) / 1000)
         dt = datetime.fromtimestamp(time_s)
@@ -65,6 +108,12 @@ class SvergiesRadioApi:
 
 
     def _get_all_channel_information(self):
+        """
+        Retrieve and update channel information for all tracks.
+
+        This method retrieves channel information from the Sveriges Radio API
+        and updates the track list with the retrieved information.
+        """
         try:
             response = requests.get((self._URL + "/channels"), params=self._PARAMS)
             response.raise_for_status()
@@ -82,6 +131,12 @@ class SvergiesRadioApi:
 
 
     def _get_all_live_music(self):
+        """
+        Retrieve and update live music information for all channels.
+
+        This method retrieves live music information from the Sveriges Radio API
+        and updates the track list with the retrieved information.
+        """
         try:
             response = requests.get((self._URL + "/playlists/rightnow"), params=self._PARAMS)
             response.raise_for_status()
@@ -117,6 +172,12 @@ class SvergiesRadioApi:
 
 
     def debugg_print(self, list):
+        """
+        Print the details of each track in the provided list.
+
+        Args:
+            list (list): A list of Track objects to be printed.
+        """
         for t in list:
             print("#")
             print("| ID:     ", t.channel_id)

@@ -14,6 +14,7 @@ package-lock.json
 *.pyd
 __pycache__/
 .Python
+venv
 .venv
 pip-log.txt
 pip-delete-this-directory.txt
