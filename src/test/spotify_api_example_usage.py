@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     # Example 3: Retrieve album images for multiple Track objects
     track_objects = [
-        Track(song_title="21st Century Schizoid Man", artist_name="King Crimson"),
+        Track(song_title="Last Christmas", artist_name="Wham!"),
         Track(song_title="Money", artist_name="Pink Floyd"),
         Track(song_title="Sunshine of Your Love", artist_name="Cream"),
     ]

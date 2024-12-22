@@ -11,6 +11,38 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 load_dotenv()
 
+
+def _extract_images_from_items(items: List[Dict], key: str = "album") -> Optional[str]:
+    """
+    Extract images from a list of items (album or artist).
+
+    Args:
+        items (List[Dict]): A list of Spotify API response items.
+        key (str): The key to extract images from (default is "album").
+
+    Returns:
+        Optional[str]: The URL of the largest image, or None if not found.
+    """
+    if not items:
+        return None
+
+    images = items[0].get(key, {}).get("images", [])
+    return images[0]["url"] if images else None
+
+
+def _extract_album_image_url(track_response: Dict) -> Optional[str]:
+    """
+    Extract the album image URL from a Spotify track response.
+
+    Args:
+        track_response (Dict): JSON response from the Spotify API.
+
+    Returns:
+        Optional[str]: URL of the album image if available, else None.
+    """
+    return _extract_images_from_items(track_response.get("tracks", {}).get("items", []))
+
+
 class SpotifyAPI:
     """
     A class to interact with the Spotify API for retrieving track and album information.
@@ -22,6 +54,7 @@ class SpotifyAPI:
         """
         self.SPOTIFY_TOKEN_URL = os.getenv("SPOTIFY_TOKEN_URL", "https://accounts.spotify.com/api/token")
         self.SPOTIFY_SEARCH_URL = os.getenv("SPOTIFY_SEARCH_URL", "https://api.spotify.com/v1/search")
+        self.SPOTIFY_ARTIST_URL = "https://api.spotify.com/v1/artists"
         self.CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
         self.CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
         self._cached_token: Optional[str] = None
@@ -74,7 +107,6 @@ class SpotifyAPI:
 
         response = requests.get(endpoint, headers=headers, params=params)
         if response.status_code == 200:
-            logging.info(f"Spotify API request successful for params: {params}")
             return response.json()
         else:
             logging.error(
@@ -82,33 +114,36 @@ class SpotifyAPI:
             )
             return None
 
-    def _extract_album_image_url(self, track_response: Dict) -> Optional[str]:
+    def _extract_genres(self, response: Dict) -> Optional[List[str]]:
         """
-        Extract the album image URL from a Spotify track response.
+        Extract genres from a Spotify API response.
 
         Args:
-            track_response (Dict): JSON response from the Spotify API.
+            response (Dict): JSON response from the Spotify API.
 
         Returns:
-            Optional[str]: URL of the album image if available, else None.
+            Optional[List[str]]: A list of genres or None if not found.
         """
-        tracks = track_response.get("tracks", {}).get("items", [])
+        tracks = response.get("tracks", {}).get("items", [])
         if tracks:
-            album_images = tracks[0].get("album", {}).get("images", [])
-            if album_images:
-                return album_images[0]["url"]
+            artist_id = tracks[0].get("artists", [{}])[0].get("id")
+            if artist_id:
+                artist_response = self._make_spotify_request(f"{self.SPOTIFY_ARTIST_URL}/{artist_id}", {})
+                if artist_response:
+                    return artist_response.get("genres", [])
         return None
 
     def get_album_image_for_song(self, song_title: str, artist_name: str) -> Optional[str]:
         """
         Retrieve the album image URL for a song and artist.
+        If no album image is found, fallback to an artist image.
 
         Args:
             song_title (str): The song title.
             artist_name (str): The artist's name.
 
         Returns:
-            Optional[str]: URL of the album image, or None if not found.
+            Optional[str]: URL of the album or artist image, or None if not found.
         """
         search_params = {
             "q": f"track:{song_title} artist:{artist_name}",
@@ -117,12 +152,25 @@ class SpotifyAPI:
         }
         response = self._make_spotify_request(self.SPOTIFY_SEARCH_URL, search_params)
         if response:
-            return self._extract_album_image_url(response)
-        return None
+            tracks = response.get("tracks", {}).get("items", [])
+            if tracks:
+                album_images = tracks[0].get("album", {}).get("images", [])
+                if album_images:
+                    return album_images[0]["url"]
+
+                artist_id = tracks[0].get("artists", [{}])[0].get("id")
+                if artist_id:
+                    if not artist_id.strip():
+                        logging.warning("Artist ID is empty or invalid. Skipping fallback to artist image.")
+                        return None
+                    return self.get_artist_image(artist_id)
+
+            return None
 
     def get_album_image_for_track(self, track: Track) -> Track:
         """
         Retrieve the album image for a given Track object and update it.
+        If no album image is found, fallback to an artist image.
 
         Args:
             track (Track): A Track object containing song title and artist name.
@@ -131,13 +179,9 @@ class SpotifyAPI:
             Track: The updated Track object with the album_image attribute set.
         """
         album_image = self.get_album_image_for_song(track.song_title, track.artist_name)
-        if album_image:
-            logging.info(
-                f"Album image found for '{track.song_title}' by '{track.artist_name}'."
-            )
-        else:
+        if not album_image:
             logging.warning(
-                f"No album image found for '{track.song_title}' by '{track.artist_name}'."
+                f"No album image found for '{track.song_title}' by '{track.artist_name}', using fallback."
             )
         track.album_image = album_image
         return track
@@ -155,3 +199,62 @@ class SpotifyAPI:
         for track in track_objects:
             self.get_album_image_for_track(track)
         return track_objects
+
+    def get_genre_for_track(self, track: Track) -> Optional[List[str]]:
+        """
+        Retrieve the genre for a given Track object.
+
+        Args:
+            track (Track): A Track object containing song title and artist name.
+
+        Returns:
+            Optional[List[str]]: A list of genres or None if not found.
+        """
+        search_params = {
+            "q": f"track:{track.song_title} artist:{track.artist_name}",
+            "type": "track",
+            "limit": 1,
+        }
+        response = self._make_spotify_request(self.SPOTIFY_SEARCH_URL, search_params)
+        genres = self._extract_genres(response)
+        if genres:
+            return genres
+        logging.warning(f"No genres found for '{track.song_title}' by '{track.artist_name}'.")
+        return None
+
+    def get_artist_image(self, artist_id: str) -> Optional[str]:
+        """
+        Retrieve the image for a given artist from Spotify.
+
+        Args:
+            artist_id (str): The Spotify artist ID.
+
+        Returns:
+            Optional[str]: URL of the artist's image, or None if not found.
+        """
+        endpoint = f"{self.SPOTIFY_ARTIST_URL}/{artist_id}"
+        response = self._make_spotify_request(endpoint, {})
+        return _extract_images_from_items([response], key="images") if response else None
+
+    def get_genre_for_song(self, song_title: str, artist_name: str) -> Optional[List[str]]:
+        """
+        Retrieve the genre for a song and artist.
+
+        Args:
+            song_title (str): The song title.
+            artist_name (str): The artist's name.
+
+        Returns:
+            Optional[List[str]]: A list of genres or None if not found.
+        """
+        search_params = {
+            "q": f"track:{song_title} artist:{artist_name}",
+            "type": "track",
+            "limit": 1,
+        }
+        response = self._make_spotify_request(self.SPOTIFY_SEARCH_URL, search_params)
+        genres = self._extract_genres(response)
+        if genres:
+            return genres
+        logging.warning(f"No genres found for '{song_title}' by '{song_title}'.")
+        return None
