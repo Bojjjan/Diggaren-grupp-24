@@ -259,7 +259,7 @@ class SpotifyAPI:
         logging.warning(f"No genres found for '{song_title}' by '{song_title}'.")
         return None
 
-    def add_spotify_id_to_track(self, track: Track) -> Track:
+    def add_spotify_data_to_track(self, track: Track) -> Track:
         """
         Add the Spotify ID to a Track object.
 
@@ -269,14 +269,43 @@ class SpotifyAPI:
         Returns:
             Track: The updated Track object with the Spotify ID attribute set.
         """
+        spotify_data = self.fetch_spotify_data_for_track(track)
+        if not spotify_data:
+            return track
+
+        track.spotify_id = spotify_data.get("id")
+        if track.spotify_id:
+            logging.info(f"Spotify ID added for '{track.song_title}' by '{track.artist_name}': {track.spotify_id}")
+        else:
+            logging.warning(f"No Spotify ID found for '{track.song_title}' by '{track.artist_name}'.")
+
+        return track
+
+    def fetch_spotify_data_for_track(self, track: Track) -> Optional[Dict]:
+        """
+        Fetch Spotify data for a given track.
+
+        Args:
+            track (Track): A Track object containing song title and artist name.
+
+        Returns:
+            Optional[Dict]: The Spotify track data dictionary or None if not found.
+        """
         search_params = {
-            "q": f"track:{track.song_title} artist:{track.artist_name}",
+            "q": f'track:"{track.song_title}" artist:"{track.artist_name}"',
             "type": "track",
             "limit": 1,
         }
         response = self._make_spotify_request(self.SPOTIFY_SEARCH_URL, search_params)
-        if response:
-            tracks = response.get("tracks", {}).get("items", [])
-            if tracks:
-                track.spotify_id = tracks[0].get("id")
-        return track
+
+        if not response:
+            logging.error(f"Failed to retrieve data for '{track.song_title}' by '{track.artist_name}'.")
+            return None
+
+        tracks = response.get("tracks", {}).get("items", [])
+        if not tracks:
+            logging.warning(f"No tracks found for '{track.song_title}' by '{track.artist_name}'.")
+            return None
+
+        logging.debug(f"Spotify API response for '{track.song_title}': {tracks[0]}")
+        return tracks[0]
