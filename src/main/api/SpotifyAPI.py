@@ -258,3 +258,25 @@ class SpotifyAPI:
             return genres
         logging.warning(f"No genres found for '{song_title}' by '{song_title}'.")
         return None
+
+    def add_spotify_id_to_track(self, track: Track) -> Track:
+        """
+        Add the Spotify ID to a Track object.
+
+        Args:
+            track (Track): A Track object containing song title and artist name.
+
+        Returns:
+            Track: The updated Track object with the Spotify ID attribute set.
+        """
+        search_params = {
+            "q": f"track:{track.song_title} artist:{track.artist_name}",
+            "type": "track",
+            "limit": 1,
+        }
+        response = self._make_spotify_request(self.SPOTIFY_SEARCH_URL, search_params)
+        if response:
+            tracks = response.get("tracks", {}).get("items", [])
+            if tracks:
+                track.spotify_id = tracks[0].get("id")
+        return track

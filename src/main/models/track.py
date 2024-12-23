@@ -3,6 +3,7 @@ from typing import Optional, Dict
 
 @dataclass
 class Track:
+    spotify_id: Optional[str] = None
     song_title: Optional[str] = None
     album_image: Optional[str] = None
     artist_name: Optional[str] = None
