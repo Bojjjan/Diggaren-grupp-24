@@ -86,6 +86,19 @@ class DatabaseManager:
             self.connection.commit()
             logger.info(f"Channel '{name}' added successfully.")
 
+    def add_channel_with_id(self, channel_id: int, name: str):
+        """
+        Adds a channel to the Channels table with a specific ID.
+        """
+        query = """
+        INSERT INTO Channels (ChannelID, Name)
+        VALUES (%s, %s)
+        """
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, (channel_id, name))
+            self.connection.commit()
+            logger.info(f"Channel '{name}' with ID '{channel_id}' added successfully.")
+
     def get_channel_by_id(self, channel_id: int) -> Optional[Dict]:
         """
         Retrieves a channel by its ID.
