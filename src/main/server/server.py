@@ -45,6 +45,6 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         debug_status = True
     
-    #top_list_updater.start()
+    top_list_updater.start()
 
     app.run(debug=debug_status)
