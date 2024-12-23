@@ -33,16 +33,16 @@ class DatabaseManager:
 
 
     # --- Tracks Table Methods ---
-    def add_track(self, title: str, artist: str, genre: Optional[str], duration: int):
+    def add_track(self, spotify_id: str, title: str, artist: str):
         """
         Adds a track to the Tracks table.
         """
         query = """
-        INSERT INTO Tracks (Title, Artist, Genre, Duration)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO Tracks (TrackID, Title, Artist)
+        VALUES (%s, %s, %s)
         """
         with self.connection.cursor() as cursor:
-            cursor.execute(query, (title, artist, genre, duration))
+            cursor.execute(query, (spotify_id, title, artist))
             self.connection.commit()
             logger.info(f"Track '{title}' by '{artist}' added successfully.")
 
@@ -110,18 +110,18 @@ class DatabaseManager:
 
 
     # --- PlayHistory Table Methods ---
-    def add_play_history(self, spotify_id: int, channel_id: int, timestamp: str):
+    def add_play_history(self, spotify_id: int, channel_id: int):
         """
         Adds an entry to the PlayHistory table.
         """
         query = """
-        INSERT INTO PlayHistory (SpotifyID, ChannelID, Timestamp)
-        VALUES (%s, %s, %s)
+        INSERT INTO PlayHistory (SpotifyID, ChannelID)
+        VALUES (%s, %s)
         """
         with self.connection.cursor() as cursor:
-            cursor.execute(query, (spotify_id, channel_id, timestamp))
+            cursor.execute(query, (spotify_id, channel_id))
             self.connection.commit()
-            logger.info(f"Play history added for SpotifyID '{spotify_id}' at '{timestamp}'.")
+            logger.info(f"Play history added for SpotifyID '{spotify_id}' on channel '{channel_id}'")
 
     def get_play_history_by_channel(self, channel_id: int) -> List[Dict]:
         """
@@ -135,6 +135,19 @@ class DatabaseManager:
         with self.connection.cursor() as cursor:
             cursor.execute(query, (channel_id,))
             return cursor.fetchall()
+
+    def get_latest_track_from_channel(self, channel_id: int) -> List[Dict]:
+        """
+        Retrieves play history for a specific channel.
+        """
+        query = """
+        SELECT SpotifyID FROM PlayHistory
+        WHERE ChannelID = %s
+        ORDER BY Timestamp DESC
+        """
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, (channel_id,))
+            return cursor.fetchone()
 
     def get_play_history_by_date(self, start_date: str, end_date: str) -> List[Dict]:
         """

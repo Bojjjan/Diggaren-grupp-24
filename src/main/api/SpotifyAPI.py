@@ -271,6 +271,7 @@ class SpotifyAPI:
         """
         spotify_data = self.fetch_spotify_data_for_track(track)
         if not spotify_data:
+            track.spotify_id = track.song_title + track.artist_name
             return track
 
         track.spotify_id = spotify_data.get("id")

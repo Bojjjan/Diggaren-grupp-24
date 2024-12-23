@@ -17,7 +17,7 @@ class SvergiesRadioApi:
         """
         Initialize the SvergiesRadioApi class.
         """
-        self._track_list: List[track] = []
+        self._track_list: List[Track] = []
         self._URL =  "https://api.sr.se/api/v2"
         self._PARAMS = {
             "pagination": "false",
