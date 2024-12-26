@@ -11,7 +11,6 @@ from main.models.track import Track
 class TopListUpdater:
     def __init__(self):
         self.sveriges_radio_api = SvergiesRadioApi()
-        self.spotify_api = SpotifyAPI()
         self.stop_event = threading.Event()
         self.thread = None
 
@@ -26,12 +25,13 @@ class TopListUpdater:
     def update_top_list(self):
         while not self.stop_event.is_set():
             db = DatabaseManager(self.db_host, self.db_user, self.db_pass, self.db_name)
+            spotify_api = SpotifyAPI()
 
             print("TopListUpdater: Fetching Channels")
             sr_channels = self.sveriges_radio_api.get_all_channels()
             for track in sr_channels:
 
-                self.spotify_api.add_spotify_data_to_track(track)
+                spotify_api.add_spotify_data_to_track(track)
 
                 if not db.get_channel_by_id(track.channel_id):
                     print("TopListUpdater: Adding channel ", track.channel_id, " added to DB.")
