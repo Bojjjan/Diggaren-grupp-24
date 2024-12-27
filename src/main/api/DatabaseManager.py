@@ -6,6 +6,13 @@ from typing import Optional, List, Dict
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger()
 
+def clean_string(input_str: str) -> str:
+    """
+    Encodes the string in UTF-8, replacing invalid characters with '?'.
+    Then decodes it back to a Python string so that it is valid UTF-8.
+    """
+    return input_str.encode("utf-8", errors="replace").decode("utf-8")
+
 class DatabaseManager:
     """
     Handles database interactions for Tracks, Channels, and PlayHistory.
@@ -20,7 +27,9 @@ class DatabaseManager:
             user=user,
             password=password,
             database=database,
-            cursorclass=DictCursor
+            charset="utf8mb4",
+            use_unicode=True,
+            cursorclass=pymysql.cursors.DictCursor
         )
 
     def close_connection(self):
@@ -36,15 +45,22 @@ class DatabaseManager:
     def add_track(self, spotify_id: str, title: str, artist: str):
         """
         Adds a track to the Tracks table.
+        Replaces problematic characters in the title and artist names before inserting.
         """
+        title = clean_string(title)
+        artist = clean_string(artist)
+
         query = """
         INSERT INTO Tracks (TrackID, Title, Artist)
         VALUES (%s, %s, %s)
         """
-        with self.connection.cursor() as cursor:
-            cursor.execute(query, (spotify_id, title, artist))
-            self.connection.commit()
-            logger.info(f"Track '{title}' by '{artist}' added successfully.")
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute(query, (spotify_id, title, artist))
+                self.connection.commit()
+                logger.info(f"Track '{title}' by '{artist}' added successfully.")
+        except Exception as e:
+            logger.error(f"Failed to add track '{title}' by '{artist}' due to: {e}")
 
     def get_track_by_id(self, track_id: int) -> Optional[Dict]:
         """
