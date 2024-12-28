@@ -47,4 +47,4 @@ if __name__ == '__main__':
     
     top_list_updater.start()
 
-    app.run(debug=debug_status)
+    app.run(debug=debug_status, port=5001)
