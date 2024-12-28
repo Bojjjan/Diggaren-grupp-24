@@ -1,7 +1,7 @@
 import os
 import base64
 import requests
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from typing import List, Dict, Optional
 import logging
 
@@ -9,7 +9,7 @@ from main.models.track import Track
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-load_dotenv()
+load_dotenv(find_dotenv())
 
 
 def _extract_images_from_items(items: List[Dict], key: str = "album") -> Optional[str]:

@@ -1,7 +1,7 @@
 import os
 import threading
 import time
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from main.api.sveriges_radio_api import SvergiesRadioApi
 from main.api.DatabaseManager import DatabaseManager
 from main.api.SpotifyAPI import SpotifyAPI
@@ -18,7 +18,7 @@ class TopListUpdater:
         self.stop_event = threading.Event()
         self.thread = None
 
-        load_dotenv()
+        load_dotenv(find_dotenv())
 
         self.db_host = os.getenv("DB_HOST")
         self.db_user = os.getenv("DB_USER")
