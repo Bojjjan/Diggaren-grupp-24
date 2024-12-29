@@ -5,12 +5,14 @@ import signal
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 from flask import Flask, jsonify, Response
+from flask_cors import CORS
 
 from main.api.sveriges_radio_api import SvergiesRadioApi
 from main.api.SpotifyAPI import SpotifyAPI
 from main.server.top_list_updater import TopListUpdater
 
 app = Flask(__name__)
+CORS(app)
 srAPI = SvergiesRadioApi()
 spotifyAPI = SpotifyAPI()
 top_list_updater = TopListUpdater()
