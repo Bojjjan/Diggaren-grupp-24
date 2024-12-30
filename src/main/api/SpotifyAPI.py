@@ -4,43 +4,13 @@ import requests
 from dotenv import load_dotenv
 from typing import List, Dict, Optional
 import logging
+from datetime import datetime, timedelta
 
 from main.models.track import Track
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 load_dotenv()
-
-
-def _extract_images_from_items(items: List[Dict], key: str = "album") -> Optional[str]:
-    """
-    Extract images from a list of items (album or artist).
-
-    Args:
-        items (List[Dict]): A list of Spotify API response items.
-        key (str): The key to extract images from (default is "album").
-
-    Returns:
-        Optional[str]: The URL of the largest image, or None if not found.
-    """
-    if not items:
-        return None
-
-    images = items[0].get(key, {}).get("images", [])
-    return images[0]["url"] if images else None
-
-
-def _extract_album_image_url(track_response: Dict) -> Optional[str]:
-    """
-    Extract the album image URL from a Spotify track response.
-
-    Args:
-        track_response (Dict): JSON response from the Spotify API.
-
-    Returns:
-        Optional[str]: URL of the album image if available, else None.
-    """
-    return _extract_images_from_items(track_response.get("tracks", {}).get("items", []))
 
 
 class SpotifyAPI:
@@ -58,15 +28,17 @@ class SpotifyAPI:
         self.CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
         self.CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
         self._cached_token: Optional[str] = None
+        self._token_expiry: Optional[datetime] = None
 
     def _get_spotify_token(self) -> str:
         """
         Retrieve a Spotify access token using client credentials.
+        Automatically refreshes the token if it has expired.
 
         Returns:
             str: A valid Spotify access token.
         """
-        if self._cached_token:
+        if self._cached_token and self._token_expiry and datetime.now() < self._token_expiry:
             return self._cached_token
 
         client_credentials = f"{self.CLIENT_ID}:{self.CLIENT_SECRET}"
@@ -80,7 +52,10 @@ class SpotifyAPI:
         response = requests.post(self.SPOTIFY_TOKEN_URL, headers=headers, data=data)
 
         if response.status_code == 200:
-            self._cached_token = response.json().get("access_token")
+            token_data = response.json()
+            self._cached_token = token_data.get("access_token")
+            expires_in = token_data.get("expires_in", 600)
+            self._token_expiry = datetime.now() + timedelta(seconds=expires_in)
             logging.info("Spotify token successfully retrieved.")
             return self._cached_token
         else:
@@ -94,6 +69,8 @@ class SpotifyAPI:
     def _make_spotify_request(self, endpoint: str, params: Dict[str, str]) -> Optional[Dict]:
         """
         Make an authenticated GET request to the Spotify API.
+        Automatically refreshes the token if the request fails for any reason
+        other than success (200) or expected 'not found' errors.
 
         Args:
             endpoint (str): The Spotify API endpoint.
@@ -102,17 +79,35 @@ class SpotifyAPI:
         Returns:
             Optional[Dict]: JSON response data or None if request fails.
         """
-        token = self._get_spotify_token()
-        headers = {"Authorization": f"Bearer {token}"}
+        max_retries = 2
+        attempts = 0
 
-        response = requests.get(endpoint, headers=headers, params=params)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            logging.error(
-                f"Spotify API request failed: {response.status_code} - {response.text}"
-            )
-            return None
+        def request_with_token():
+            """Helper function to make a request with the current token."""
+            token = self._get_spotify_token()
+            headers = {"Authorization": f"Bearer {token}"}
+            return requests.get(endpoint, headers=headers, params=params)
+
+        while attempts < max_retries:
+            attempts += 1
+            response = request_with_token()
+
+            if response.status_code == 200:
+                return response.json()
+            elif response.status_code == 404:
+                logging.warning(f"Requested resource not found: {response.text}")
+                return None
+            else:
+                logging.warning(
+                    f"Spotify API request failed (attempt {attempts}, status code: {response.status_code}). "
+                    f"Refreshing token and retrying."
+                )
+                self._cached_token = None
+
+        logging.error(
+            f"Spotify API request failed after {max_retries} attempts."
+        )
+        return None
 
     def _extract_genres(self, response: Dict) -> Optional[List[str]]:
         """
@@ -160,12 +155,14 @@ class SpotifyAPI:
 
                 artist_id = tracks[0].get("artists", [{}])[0].get("id")
                 if artist_id:
-                    if not artist_id.strip():
-                        logging.warning("Artist ID is empty or invalid. Skipping fallback to artist image.")
-                        return None
-                    return self.get_artist_image(artist_id)
+                    logging.info(f"Falling back to artist image for '{song_title}' by '{artist_name}'.")
+                    artist_image = self.get_artist_image(artist_id)
+                    if artist_image:
+                        return artist_image
 
-            return None
+        logging.warning(f"No album or artist image found for '{song_title}' by '{artist_name}'.")
+        return None
+
 
     def get_album_image_for_track(self, track: Track) -> Track:
         """
@@ -310,3 +307,33 @@ class SpotifyAPI:
 
         logging.debug(f"Spotify API response for '{track.song_title}': {tracks[0]}")
         return tracks[0]
+
+def _extract_images_from_items(items: List[Dict], key: str = "album") -> Optional[str]:
+    """
+    Extract images from a list of items (album or artist).
+
+    Args:
+        items (List[Dict]): A list of Spotify API response items.
+        key (str): The key to extract images from (default is "album").
+
+    Returns:
+        Optional[str]: The URL of the largest image, or None if not found.
+    """
+    if not items:
+        return None
+
+    images = items[0].get(key, {}).get("images", [])
+    return images[0]["url"] if images else None
+
+
+def _extract_album_image_url(track_response: Dict) -> Optional[str]:
+    """
+    Extract the album image URL from a Spotify track response.
+
+    Args:
+        track_response (Dict): JSON response from the Spotify API.
+
+    Returns:
+        Optional[str]: URL of the album image if available, else None.
+    """
+    return _extract_images_from_items(track_response.get("tracks", {}).get("items", []))
