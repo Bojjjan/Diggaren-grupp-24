@@ -23,3 +23,11 @@ git clone https://github.com/Bojjjan/Diggaren-grupp-24.git
 Run the appropriate script based on your operating system: <br>
 Windows: ```start.bat``` <br>
 Mac/Linux: ```start.sh```
+
+### 3. Alternative:
+navigate to the project folder and run the following command:
+python setup_env.py
+Your virtual environment is now set up.
+
+pip install -e .
+All required packages and dependencies are now installed.
