@@ -1,55 +1,96 @@
-    const baseURL = "http://127.0.0.1:5001/channels";
+const baseURL = "http://127.0.0.1:5001/channels";
+
+async function listChannels() {
+  const options = {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+    },
+  };
+
+  const response = await fetch(baseURL, options);
+  const channels = await response.json();
+  const container = document.querySelector(".container .row"); 
+  container.replaceChildren(); 
+
+  channels.forEach((channel) => {
     
-    async function listChannels() {
-      const options = {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-      };
-      const response = await fetch(baseURL, options);
-      const channels = await response.json();
-      const channelList = document.querySelector("#channels");
-      channelList.replaceChildren(); 
-    
-      channels.forEach((channel) => {
-        let listItem = document.createElement("li");
-        listItem.setAttribute("data-id", channel.channel_id);
-        listItem.textContent = channel.channel_name; 
-        listItem.addEventListener("click", fetchThenDisplayChannel);
-        channelList.appendChild(listItem);
-      });
+    const colDiv = document.createElement("div");
+    colDiv.classList.add("col-6");
+
+    const radioContentDiv = document.createElement("div");
+    radioContentDiv.classList.add("d-flex", "align-items-center", "p-3", "radio-content");
+
+    const channelImageDiv = document.createElement("div");
+    channelImageDiv.classList.add("radio-icon", "me-3");
+    const channelImage = document.createElement("img");
+
+    let imageSrc = "defaultChannel.JPEG";
+    if (channel.channel_img) {
+      imageSrc = channel.channel_img;
     }
-    
-    async function fetchThenDisplayChannel(event) {
-      const channelId = event.target.getAttribute("data-id");
-      const url = `${baseURL}/${channelId}`;
-      const options = {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-      };
-      const response = await fetch(url, options);
-      const channel = await response.json();          
-      displayChannel(channel);
+    channelImage.setAttribute("src", imageSrc);
+
+    let imageAlt = "No channel image available";
+    if (channel.channel_name) {
+      imageAlt = channel.channel_name;
     }
-    
-    function displayChannel(channel) {
-      const image = document.createElement("img");
-      image.setAttribute("src", channel.album_image);
-      image.setAttribute("alt", channel.song_title);
-    
-      document.querySelector("#channelName").innerHTML = channel.channel_name;
-      document.querySelector("#albumImageContainer").replaceChildren(image);
-      document.querySelector("#songTitle").innerHTML = channel.song_title;
-      document.querySelector("#artistName").innerHTML = channel.artist_name;
-    
-      document.querySelector("#existingChannel input[name=id]").value = channel.channel_id;
-      document.querySelector("#existingChannel input[name=name]").value = channel.channel_name;
-      document.querySelector("#existingChannel input[name=album_image]").value = channel.album_image;
-      document.querySelector("#existingChannel input[name=song_title]").value = channel.song_title;
-      document.querySelector("#existingChannel input[name=artist_name]").value = channel.artist_name;
+    channelImage.setAttribute("alt", imageAlt);
+
+    channelImage.setAttribute("width", "75");
+    channelImage.setAttribute("height", "75");
+    channelImageDiv.appendChild(channelImage);
+
+    const albumCoverDiv = document.createElement("div");
+    albumCoverDiv.classList.add("album-cover", "me-3");
+    const albumImage = document.createElement("img");
+
+    let albumSrc = "defaultChannel.JPEG";
+    if (channel.album_image) {
+      albumSrc = channel.album_image;
     }
-    
-    document.addEventListener("DOMContentLoaded", listChannels);
+    albumImage.setAttribute("src", albumSrc);
+
+    let albumAlt = "No album image available";
+    if (channel.song_title) {
+      albumAlt = channel.song_title;
+    }
+    albumImage.setAttribute("alt", albumAlt);
+
+    albumImage.setAttribute("width", "75");
+    albumImage.setAttribute("height", "75");
+    albumCoverDiv.appendChild(albumImage);
+
+    const songInfoDiv = document.createElement("div");
+    songInfoDiv.classList.add("song-info", "text-start");
+
+    const songName = document.createElement("h5");
+    songName.classList.add("mb-1");
+    if (channel.song_title) {
+      songName.textContent = channel.song_title;
+    } else {
+      songName.textContent = "No song playing";
+    }
+
+    const artistName = document.createElement("p");
+    artistName.classList.add("mb-1");
+    if (channel.artist_name) {
+      artistName.textContent = channel.artist_name;
+    } else {
+      artistName.textContent = "Unknown artist";
+    }
+
+    songInfoDiv.appendChild(songName);
+    songInfoDiv.appendChild(artistName);
+
+    radioContentDiv.appendChild(channelImageDiv);
+    radioContentDiv.appendChild(albumCoverDiv);
+    radioContentDiv.appendChild(songInfoDiv);
+
+    colDiv.appendChild(radioContentDiv);
+
+    container.appendChild(colDiv);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", listChannels);
