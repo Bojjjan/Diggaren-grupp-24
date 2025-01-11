@@ -71,7 +71,7 @@ class HistoryUpdater:
             time.sleep(60)
 
     def start(self):
-        self.thread = threading.Thread(target=self.update_top_list, name="HistoryUpdaterThread")
+        self.thread = threading.Thread(target=self.update_history, name="HistoryUpdaterThread")
         self.thread.start()
         logger.info("HistoryUpdater: Thread started.")
 
