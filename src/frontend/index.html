@@ -38,10 +38,28 @@
     <main class="px-3">
       <div class="container text-center">
         <div class="row g-2">
-          <!-- Channels will be dynamically inserted here -->
+          <!-- Här fylls info om radiokanalerna på. -->
         </div>
       </div>
     </main>
+
+
+    <div class="modal fade" id="previousSongsModal" tabindex="-1" aria-labelledby="previousSongsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-bg-dark">
+          <div class="modal-header">
+            <h5 class="modal-title" id="previousSongsModalLabel">Previous Songs</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <ul id="previous-songs-list" class="list-unstyled">
+              <!-- lägg till låtar här på något sätt? -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>    
+
 
     <footer class="mt-auto text-white-50">
       <p>Cover template for Grupp 24 </p>

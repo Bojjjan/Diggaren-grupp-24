@@ -14,7 +14,6 @@ async function listChannels() {
   container.replaceChildren(); 
 
   channels.forEach((channel) => {
-    
     const colDiv = document.createElement("div");
     colDiv.classList.add("col-6");
 
@@ -36,7 +35,6 @@ async function listChannels() {
       imageAlt = channel.channel_name;
     }
     channelImage.setAttribute("alt", imageAlt);
-
     channelImage.setAttribute("width", "75");
     channelImage.setAttribute("height", "75");
     channelImageDiv.appendChild(channelImage);
@@ -87,10 +85,29 @@ async function listChannels() {
     radioContentDiv.appendChild(albumCoverDiv);
     radioContentDiv.appendChild(songInfoDiv);
 
-    colDiv.appendChild(radioContentDiv);
+    radioContentDiv.addEventListener("click", () => openModal(channel.id)); 
 
+    colDiv.appendChild(radioContentDiv);
     container.appendChild(colDiv);
   });
 }
+
+function openModal(channelId) {  
+  const previousSongs = [
+    { title: "Låt-namn", artist: "Artist-namn" },
+  ];
+
+  const songList = document.getElementById("previous-songs-list");
+  songList.innerHTML = ""; 
+
+  previousSongs.forEach((song) => {
+    const listItem = document.createElement("li");
+    listItem.textContent = `${song.title} - ${song.artist}`;
+    songList.appendChild(listItem);
+  });
+
+  const modal = new bootstrap.Modal(document.getElementById("previousSongsModal"));
+  modal.show();
+}           
 
 document.addEventListener("DOMContentLoaded", listChannels);
