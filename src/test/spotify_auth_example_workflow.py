@@ -75,7 +75,8 @@ if __name__ == "__main__":
     spotify_auth = SpotifyAuth(client_id, client_secret, redirect_uri)
 
     # Generate the URL for user authorization
-    scopes = ["playlist-modify-public", "playlist-modify-private"]
+    scopes = ["playlist-modify-public", "playlist-modify-private", "playlist-read-private"]
+
     auth_url = spotify_auth.get_authorization_url(scopes)
     logger.info(f"Visit this URL to authorize: {auth_url}")
 
@@ -107,20 +108,15 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # --- Spotify Playlist Operations ---
-    # Initialize SpotifyPlaylistManager with the access token
     spotify_playlist_manager = SpotifyPlaylistManager(spotify_auth.access_token)
 
-    # Example: Add tracks to a Spotify playlist
-    playlist_id = "your_playlist_id_here"  # Replace with your Spotify playlist ID
-    track_uris = ["spotify:track:track_id_1", "spotify:track:track_id_2"]  # Replace with Spotify track URIs
-
     try:
-        # Add tracks to the playlist
-        spotify_playlist_manager.add_to_playlist(playlist_id, track_uris)
-        logger.info("Tracks successfully added to playlist.")
+        playlists = spotify_playlist_manager.get_playlists()
+        if playlists:
+            logger.info("User Playlists:")
+            for playlist in playlists:
+                logger.info(f"Playlist Name: {playlist['name']} (ID: {playlist['id']})")
+        else:
+            logger.info("No playlists found. Please ensure the account has playlists.")
     except Exception as e:
-        logger.error(f"Error adding tracks to playlist: {e}")
-        sys.exit(1)
-
-    logger.info("Process complete. Exiting...")
-    sys.exit(0)
+        logger.error(f"Error retrieving playlists: {e}")
