@@ -58,14 +58,13 @@ def get_user_spotify_playlists():
     Requires a spotify authentication code.
     """
 
-    data = request.json
-    auth_code = data.get("auth_code")
+    access_token = request.args.get("access_token")
 
-    spm = SpotifyPlaylistManager(auth_code)
+    if not access_token:
+        return "400: Access token is required.", 400
+
+    spm = SpotifyPlaylistManager(access_token)
     playlists = spm.get_playlists()
-
-    if not auth_code:
-        return "400: Authorization code is required.", 400
 
     return jsonify(playlists), 200
 
@@ -78,15 +77,18 @@ def add_song_to_playlist():
     Requires a spotify authentication code.
     """
 
-    data = request.json
-    auth_code = data.get("auth_code")
-    track_uris = data.get("track_uris")
-    playlist_id = data.get("playlist_idd")
+    access_token = request.args.get("access_token")
+    track_uris = request.args.get("track_uris")
+    playlist_id = request.args.get("playlist_id")
 
-    if not auth_code:
-        return "400: Authorization code is required.", 400
+    print("ACCESS TOKEN: ",access_token)
+    print("TRACK: ",track_uris)
+    print("PLAYLIST: ",playlist_id)
 
-    spm = SpotifyPlaylistManager(auth_code)
+    if not access_token:
+        return "400: Access token is required.", 400
+
+    spm = SpotifyPlaylistManager(access_token)
     spm.add_to_playlist(playlist_id, track_uris)
 
     return 200
