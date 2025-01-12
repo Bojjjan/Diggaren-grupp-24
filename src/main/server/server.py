@@ -41,6 +41,7 @@ def get_channels():
         return "500 : Internal Server Error", 500
 
     for track in channels:
+        track = spotifyAPI.add_spotify_data_to_track(track)
         track = spotifyAPI.get_album_image_for_track(track)
 
     return jsonify(channels), 200
