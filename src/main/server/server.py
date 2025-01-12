@@ -101,6 +101,8 @@ def handle_shutdown(signum, frame):
     history_updater.stop()
     sys.exit(0)
 
+
+
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handle_shutdown)
     signal.signal(signal.SIGTERM, handle_shutdown)

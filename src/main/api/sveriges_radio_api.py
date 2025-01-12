@@ -1,9 +1,11 @@
-from main.models import track
+import logging
+
 from main.models.track import Track
-from datetime import datetime, timedelta
 from typing import List
 import requests
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger()
 
 class SvergiesRadioApi:
     """
@@ -35,75 +37,13 @@ class SvergiesRadioApi:
             list: A list of Track objects containing channel and live music information.
         """
 
-        self._track_list.clear()
-        self._get_all_live_music()
-        self._get_all_channel_information()
-        return self._track_list
-
-
-    def get_channel_music_history(self, channel_id):
-        """
-        Retrieve the music history for a specific channel.
-
-        This method retrieves the music history for the specified channel
-        within the current day.
-
-        Args:
-            channel_id (int): The ID of the channel.
-
-        Returns:
-            list: A list of Track objects containing the music history for the channel.
-        """
-        music_history_list = []
-        start_date = (datetime.now().strftime('%Y-%m-%d'))
-        end_date = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
-        start_date = (start_date+"T00:00:00Z")
-        end_date = (end_date+"T00:00:00Z")
-        params = {
-            "pagination":"false",
-            "format":"JSON",
-            "id":channel_id,
-            "startdatetime":start_date,
-            "endDateTime":end_date
-        }
-
         try:
-            response = requests.get((self._URL + "/playlists/getplaylistbychannelid"), params=params)
-            response.raise_for_status()
-            data = response.json()
-
-            for song in data["song"]:
-                newtrack = Track()
-                newtrack.channel_id = channel_id
-                newtrack.song_title = song["title"]
-                newtrack.artist_name = song["artist"]
-
-                newtrack.song_start = self._microsoft_date_converter(song["starttimeutc"])
-                newtrack.song_stop = self._microsoft_date_converter(song["stoptimeutc"])
-                music_history_list.append(newtrack)
-
-            return music_history_list
-
-        except requests.exceptions.RequestException as e:
-            print(e)
-            return None
-
-
-
-    def _microsoft_date_converter(self, time_text):
-        """
-        Convert a Microsoft date string to a formatted date string.
-
-        Args:
-            time_text (str): The Microsoft date string.
-
-        Returns:
-            str: The formatted date string.
-        """
-        time_ms = time_text[6:-2]
-        time_s = (int(time_ms) / 1000)
-        dt = datetime.fromtimestamp(time_s)
-        return dt.strftime('%Y-%m-%d %H:%M:%S')
+            self._track_list.clear()
+            self._get_all_live_music()
+            self._get_all_channel_information()
+        except Exception as e:
+            logger.error(f"Error in get_all_channels: {e}", exc_info=True)
+        return self._track_list
 
 
 
@@ -126,7 +66,9 @@ class SvergiesRadioApi:
                         track.channel_color = channel["color"]
 
         except requests.exceptions.RequestException as e:
-            print(e)
+            logger.error(f"RequestException in _get_all_channel_information: {e}", exc_info=True)
+        except Exception as e:
+            logger.error(f"Error in _get_all_channel_information: {e}", exc_info=True)
 
 
 
@@ -163,10 +105,13 @@ class SvergiesRadioApi:
 
                         self._track_list.append(newtrack)
             except Exception as e:
-                print(e)
+                logger.error(f"Error processing live music data: {e}", exc_info=True)
 
         except requests.exceptions.RequestException as e:
-            print(e)
+            logger.error(f"RequestException in _get_all_live_music: {e}", exc_info=True)
+
+        except Exception as e:
+            logger.error(f"Error in _get_all_live_music: {e}", exc_info=True)
 
 
 
