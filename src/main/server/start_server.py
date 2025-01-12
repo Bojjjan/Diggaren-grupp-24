@@ -7,18 +7,18 @@ from time import sleep
 skip_req = False
 
 
-def create_virtualenv(os_dir):
+def create_virtualenv(project_dir):
     """
     Creates a virtual environment in the specified directory.
 
     This function checks if a virtual environment already exists in the
-    provided directory (`os_dir`). If not, it creates the virtual
+    provided directory (`project_dir`). If not, it creates the virtual
     environment using the `venv` module. If the environment already
     exists, it sets a global flag `skip_req` to `True` to indicate
     that the environment should not be created again.
 
-    Args: os_dir:
-        os_dir (str): The path to the directory where the virtual
+    Args: project_dir:
+        project_dir (str): The path to the directory where the virtual
                             environment will be created.
 
     Returns:
@@ -30,7 +30,7 @@ def create_virtualenv(os_dir):
                                  if the environment already exists.
 
     """
-    env_dir = os.path.join(os_dir, 'venv')
+    env_dir = os.path.join(project_dir, 'venv')
     global skip_req
 
     if not os.path.exists(env_dir):
@@ -44,24 +44,24 @@ def create_virtualenv(os_dir):
 
 
 
-def install_requirements(env_dir, os_dir):
+def install_requirements(env_dir, project_dir):
     """
     Install dependencies from the requirements.txt file.
 
     This function installs the dependencies listed in the requirements.txt
-    file located in the provided directory (`os_dir`). If the global flag
+    file located in the provided directory (`project_dir`). If the global flag
     `skip_req` is set to `True`, the installation is skipped.
 
     Args:
         env_dir (str): The path to the virtual environment directory.
-        os_dir (str): The path to the directory containing the requirements.txt file.
+        project_dir (str): The path to the directory containing the requirements.txt file.
 
     """
     global skip_req
     if skip_req: return
 
 
-    requirements_file = os.path.join(os_dir, 'requirements.txt')
+    requirements_file = os.path.join(project_dir, 'requirements.txt')
 
     if not os.path.exists(requirements_file):
         print("No requirements.txt found.")
@@ -79,20 +79,20 @@ def install_requirements(env_dir, os_dir):
 
 
 
-def start_flask_server(env_dir, os_dir):
+def start_flask_server(env_dir, project_dir):
     """
     Start the Flask server.
 
     This function starts the Flask server by running the server.py file
-    located in the provided directory (`os_dir`).
+    located in the provided directory (`project_dir`).
 
     Args:
         env_dir (str): The path to the virtual environment directory.
-        os_dir (str): The path to the directory containing the server.py file.
+        project_dir (str): The path to the directory containing the server.py file.
 
     """
     print("Starting Flask server...")
-    app_file = os.path.join(os_dir, 'src\\main\\server\\server.py')
+    app_file = os.path.join(project_dir, 'src\\main\\server\\server.py')
 
     if sys.platform != 'win32':
         python_executable = os.path.join(env_dir, 'bin', 'python')
@@ -109,11 +109,12 @@ def open_browser():
     Open the web browser.
 
     This function opens the default web browser and navigates to the
-    Flask server's URL after a short delay.
+    site URL after a short delay.
     """
     print("Opening web browser...")
+    frontend = os.path.join(project_dir, 'src', 'frontend', 'index.html')
     sleep(3)
-    webbrowser.open("http://127.0.0.1:5000")
+    webbrowser.open('file://' + os.path.realpath(frontend))
 
 
 
@@ -134,16 +135,16 @@ def print_welcome_message():
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Error: Missing os_dir argument.")
+        print("Error: Missing project_dir argument.")
         sys.exit(1)
 
-    os_dir = sys.argv[1]
-    print(f"dir: {os_dir}")
+    project_dir = sys.argv[1]
+    print(f"dir: {project_dir}")
 
-    env_dir = create_virtualenv(os_dir)
-    install_requirements(env_dir, os_dir)
+    env_dir = create_virtualenv(project_dir)
+    install_requirements(env_dir, project_dir)
     print_welcome_message()
-    start_flask_server(env_dir, os_dir)
+    start_flask_server(env_dir, project_dir)
     open_browser()
 
 

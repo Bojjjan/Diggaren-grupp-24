@@ -1,7 +1,12 @@
+import os
+
+import dotenv
 import pymysql
 import logging
 from pymysql.cursors import DictCursor
 from typing import Optional, List, Dict
+from datetime import datetime, timedelta
+from main.models.track import Track
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger()
@@ -20,10 +25,16 @@ class DatabaseManager:
     Handles database interactions for Tracks, Channels, and PlayHistory.
     """
 
-    def __init__(self, host: str, user: str, password: str, database: str):
+    def __init__(self):
         """
         Initialize the database connection.
         """
+        dotenv.load_dotenv()
+        host = os.getenv("DB_HOST")
+        user = os.getenv("DB_USER")
+        password = os.getenv("DB_PASSWORD")
+        database = os.getenv("DB_NAME")
+
         self.connection = pymysql.connect(
             host=host,
             user=user,
@@ -105,7 +116,7 @@ class DatabaseManager:
         """
         Searches for tracks by title and/or artist.
         """
-        query = "SELECT * FROM Tracks WHERE 1=1"
+        query = "SELECT * FROM Tracks"
         params = []
         if title:
             query += " AND Title LIKE %s"
@@ -196,3 +207,40 @@ class DatabaseManager:
         """
         result = self._execute_query(query, (start_date, end_date))
         return result if result else []
+
+    def get_channel_id_by_name(self, channel_name: str) -> Optional[int]:
+        """
+        Retrieves the ChannelID for a given channel name.
+        """
+        query = "SELECT ChannelID FROM Channels WHERE Name = %s"
+        result = self._execute_query(query, (channel_name,), fetchone=True)
+        return result["ChannelID"] if result else None
+
+    def get_play_history_one_day_back(self, channel_identifier: str) -> List[Track]:
+        """
+        Retrieves play history one day back as Track objects for a specific channel.
+        Args:
+            channel_identifier (str): ChannelID or channel name.
+        Returns:
+            List[Track]: List of Track objects.
+        """
+
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=1)
+
+        query = """
+        SELECT t.TrackID, t.Title, t.Artist
+        FROM PlayHistory ph
+        JOIN Tracks t ON ph.SpotifyID = t.TrackID
+        WHERE ph.ChannelID = %s AND ph.Timestamp BETWEEN %s AND %s
+        ORDER BY ph.Timestamp DESC
+        """
+        results = self._execute_query(query, (channel_identifier, start_date, end_date))
+
+        tracks = [Track(
+            spotify_id=row["TrackID"],
+            song_title=row["Title"],
+            artist_name=row["Artist"],
+        ) for row in results] if results else []
+
+        return tracks

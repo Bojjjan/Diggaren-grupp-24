@@ -1,5 +1,6 @@
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from typing import Optional, Dict
+from datetime import datetime
 
 @dataclass
 class Track:
@@ -14,6 +15,7 @@ class Track:
     channel_color: Optional[str] = None
     channel_img: Optional[str] = None
     channel_id: Optional[str] = None
+    timestamp: Optional[datetime] = None
 
     def to_dict(self) -> Dict[str, Optional[str]]:
         """

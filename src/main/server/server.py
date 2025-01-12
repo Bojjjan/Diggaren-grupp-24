@@ -4,19 +4,29 @@ import signal
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
-from flask import Flask, jsonify, Response
+from flask import Flask, jsonify, Response, request
+from flask_cors import CORS
 
 from main.api.sveriges_radio_api import SvergiesRadioApi
 from main.api.SpotifyAPI import SpotifyAPI
-from main.server.top_list_updater import TopListUpdater
+from main.server.history_updater import HistoryUpdater
+from main.api.SpotifyPlaylistManager import SpotifyPlaylistManager
+from main.api.DatabaseManager import DatabaseManager
 
 app = Flask(__name__)
+CORS(app)
 srAPI = SvergiesRadioApi()
 spotifyAPI = SpotifyAPI()
-top_list_updater = TopListUpdater()
+history_updater = HistoryUpdater()
+
+
 
 @app.route("/channels", methods=["GET"])
 def get_channels():
+    """
+    Returns information about all channels that are currently playing music in a JSON format.
+    """
+
     channels = srAPI.get_all_channels()
 
     if channels is None:
@@ -27,14 +37,74 @@ def get_channels():
 
     return jsonify(channels), 200
 
+@app.route("/channels/<int:channel_id>", methods=["GET"])
+def get_channel_history(channel_id):
+
+    """
+    Returns the song history in JSON format of the channel that was given as input parameter.
+    """
+
+    dbm = DatabaseManager()
+    tracks = dbm.get_play_history_one_day_back(channel_id)
+
+    return jsonify(tracks), 200
+
+@app.route("/user_playlists", methods=["GET"])
+def get_user_spotify_playlists():
+
+    """
+    Returns a list of all the playlists on the users spotify account in a JSON format.
+
+    Requires a spotify authentication code.
+    """
+
+    access_token = request.args.get("access_token")
+
+    if not access_token:
+        return "400: Access token is required.", 400
+
+    spm = SpotifyPlaylistManager(access_token)
+    playlists = spm.get_playlists()
+
+    return jsonify(playlists), 200
+
+@app.route("/add_song_to_playlist", methods=["POST"])
+def add_song_to_playlist():
+
+    """
+    Adds a song to the selected playlist on the users spotify account.
+
+    Requires a spotify authentication code.
+    """
+
+    access_token = request.args.get("access_token")
+    track_uris = request.args.get("track_uris")
+    playlist_id = request.args.get("playlist_id")
+
+    track_list = []
+    track_list.append(track_uris)
+
+    print("ACCESS TOKEN: ",access_token)
+    print("TRACK: ",track_uris)
+    print("PLAYLIST: ",playlist_id)
+
+    if not access_token:
+        return "400: Access token is required.", 400
+
+    spm = SpotifyPlaylistManager(access_token)
+    spm.add_to_playlist(playlist_id, track_list)
+
+    return "Track successfully added.", 201
 
 @app.route("/")
 def hello_world():
-    return "<p>Diggaren API!</p>"
+    return "<p>Diggaren API!</p>", 200
 
 def handle_shutdown(signum, frame):
-    top_list_updater.stop()
+    history_updater.stop()
     sys.exit(0)
+
+
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handle_shutdown)
@@ -45,6 +115,6 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         debug_status = True
     
-    top_list_updater.start()
+    history_updater.start()
 
     app.run(debug=debug_status, port=5001)
