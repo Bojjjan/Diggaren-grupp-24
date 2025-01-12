@@ -140,3 +140,52 @@ header.mb-auto > div > a {
 header.mb-auto nav {
   margin-right: 30%;
 }
+
+
+#spotify_login_btn, #logout_btn{
+  cursor: pointer;
+}
+
+.add-song-btn {
+  margin-left: auto; 
+  margin-right: 5px; 
+  padding: 0px;
+  background-color: transparent; 
+  color: white; 
+  border: none; 
+  border-radius: 11px; 
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.add-song-btn:hover {
+  background-color: #159140; 
+}
+
+.add-song-img {
+  width: auto; 
+  height: auto;
+  
+}
+
+.playlistSection {
+  display: flex;
+  flex-direction: row;
+  background-color: transparent;
+  padding: 10px;
+  border: 2px, solid, wheat;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.playlistSection:hover {
+  display: flex;
+  flex-direction: row;
+  background-color: #159140;
+  cursor: pointer;
+}
+
+.playlistImg{
+  width: 5rem;
+  height: 5rem;
+  border-radius: 2px;
+}

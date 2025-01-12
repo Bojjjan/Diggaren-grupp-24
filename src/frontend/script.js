@@ -19,7 +19,7 @@ async function listChannels() {
 
     const radioContentDiv = document.createElement("div");
     radioContentDiv.classList.add("d-flex", "align-items-center", "p-3", "radio-content");
-
+    
     const channelImageDiv = document.createElement("div");
     channelImageDiv.classList.add("radio-icon", "me-3");
     const channelImage = document.createElement("img");
@@ -78,12 +78,30 @@ async function listChannels() {
       artistName.textContent = "Unknown artist";
     }
 
+    const addSongBtn = document.createElement("button");
+    addSongBtn.classList.add("add-song-btn");
+    const addSongImg = document.createElement("img");
+    addSongImg.src = "add_circle.svg";
+    addSongImg.alt = "+";
+    addSongImg.classList.add("add-song-img");
+    
+
     songInfoDiv.appendChild(songName);
     songInfoDiv.appendChild(artistName);
 
     radioContentDiv.appendChild(channelImageDiv);
     radioContentDiv.appendChild(albumCoverDiv);
     radioContentDiv.appendChild(songInfoDiv);
+    radioContentDiv.appendChild(addSongBtn);
+    addSongBtn.appendChild(addSongImg);
+
+
+    addSongBtn.addEventListener("click", (event) => {
+      event.stopPropagation(); 
+      const id = channel.spotify_id;
+      console.log(`Button clicked for song: ${id}`);
+      showPlaylist()
+    });
 
     radioContentDiv.addEventListener("click", () => openModal(channel.id)); 
 
@@ -92,10 +110,57 @@ async function listChannels() {
   });
 }
 
+function showPlaylist(){
+  let defaultImg = "defaultChannel.JPEG";
+  const playlists = [
+    { imgSrc: "Spellista", name: "artismsdfaköldj" },
+  ];
+
+  const label = document.getElementById("previousSongsModalLabel")
+  label.innerHTML = "Select Playlist"
+
+
+  const playlistsSection = document.getElementById("previous-songs-list");
+  playlistsSection.innerHTML = ""; 
+
+  
+
+  playlists.forEach((playlist) => {
+    const section = document.createElement("div");
+    section.classList.add("playlistSection");
+
+    const playlistImg = document.createElement("img");
+    playlistImg.classList.add("playlistImg");
+    
+
+    playlistImg.src = defaultImg;
+
+    const playlistName = document.createElement("p");
+    playlistName.innerHTML = playlist.name;
+
+    //section.textContent = `${song.title} - ${song.artist}`;
+    section.appendChild(playlistImg);
+    section.appendChild(playlistName);
+    playlistsSection.appendChild(section);
+
+    section.addEventListener("click", () => {
+        add_song_to_playlist()
+    })
+
+  });
+
+  const modal = new bootstrap.Modal(document.getElementById("previousSongsModal"));
+  modal.show();
+}
+
+
 function openModal(channelId) {  
   const previousSongs = [
     { title: "Låt-namn", artist: "Artist-namn" },
   ];
+
+  const label = document.getElementById("previousSongsModalLabel")
+  label.innerHTML = "Previous Songs"
 
   const songList = document.getElementById("previous-songs-list");
   songList.innerHTML = ""; 
@@ -116,5 +181,4 @@ document.addEventListener("DOMContentLoaded", listChannels);
 document.addEventListener("DOMContentLoaded", () => {
   listChannels();
   setInterval(listChannels, 60000); // 60 seconds
-  console.log("Refresh")
 });

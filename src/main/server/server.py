@@ -7,8 +7,10 @@ import requests
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
+
 from flask import Flask, jsonify, Response, request, session
 from flask_cors import CORS
+from flask import render_template
 
 from dotenv import load_dotenv
 
@@ -143,10 +145,10 @@ def callback():
     token_data = response.json()
     access_token = token_data.get('access_token')
     if not access_token:
-        return 'Access token not found in response', 400
+        return 'Access token not found in response =(', 400
 
     temp_code = access_token
-    return "Login succesfull. You can now close this window.", 200
+    return render_template("access_granted.html"), 200
 
 @app.route("/spotify_url", methods=["GET"])
 def get_spotify_url():

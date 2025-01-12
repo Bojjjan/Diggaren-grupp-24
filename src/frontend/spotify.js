@@ -20,7 +20,6 @@ async function get_code() {
     if (client_token === "") {
         client_token = data.code;
         get_playlists();
-        change_button();
     }
 }
 
@@ -30,13 +29,17 @@ async function get_client_id() {
     clientId = data.client_id
 }
 
+async function add_song_to_playlist(){
+
+}
+
 
 async function get_playlists() {
     const response = await fetch(playlist_url+"?access_token="+client_token, options);
     const data = await response.json();
     
     data.forEach(element => {
-        const playlist = new Playlist(element.name, element.id)
+        const playlist = new Playlist(element.name, element.id, element.image)
         playlists.push(playlist)
         console.log("Playlist added: " + playlist.name)
     });
@@ -75,8 +78,9 @@ activateLogin()
 activateLogout()
 
 class Playlist{
-    constructor(name, id){
+    constructor(name, id, image){
         this.name = name
         this.id = id
+        this.image = image
     }
 }
