@@ -1,3 +1,6 @@
+import os
+
+import dotenv
 import pymysql
 import logging
 from pymysql.cursors import DictCursor
@@ -22,10 +25,16 @@ class DatabaseManager:
     Handles database interactions for Tracks, Channels, and PlayHistory.
     """
 
-    def __init__(self, host: str, user: str, password: str, database: str):
+    def __init__(self):
         """
         Initialize the database connection.
         """
+        dotenv.load_dotenv()
+        host = os.getenv("DB_HOST")
+        user = os.getenv("DB_USER")
+        password = os.getenv("DB_PASSWORD")
+        database = os.getenv("DB_DATABASE")
+
         self.connection = pymysql.connect(
             host=host,
             user=user,
@@ -107,7 +116,7 @@ class DatabaseManager:
         """
         Searches for tracks by title and/or artist.
         """
-        query = "SELECT * FROM Tracks WHERE 1=1"
+        query = "SELECT * FROM Tracks"
         params = []
         if title:
             query += " AND Title LIKE %s"
