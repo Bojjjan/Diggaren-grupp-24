@@ -81,6 +81,9 @@ def add_song_to_playlist():
     track_uris = request.args.get("track_uris")
     playlist_id = request.args.get("playlist_id")
 
+    track_list = []
+    track_list.append(track_uris)
+
     print("ACCESS TOKEN: ",access_token)
     print("TRACK: ",track_uris)
     print("PLAYLIST: ",playlist_id)
@@ -89,9 +92,9 @@ def add_song_to_playlist():
         return "400: Access token is required.", 400
 
     spm = SpotifyPlaylistManager(access_token)
-    spm.add_to_playlist(playlist_id, track_uris)
+    spm.add_to_playlist(playlist_id, track_list)
 
-    return 200
+    return "Track successfully added.", 201
 
 @app.route("/")
 def hello_world():
