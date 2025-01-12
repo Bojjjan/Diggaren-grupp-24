@@ -1,4 +1,7 @@
 import base64
+import os
+
+import dotenv
 import requests
 import logging
 from typing import Optional
@@ -12,10 +15,11 @@ class SpotifyAuth:
     Handles Spotify authentication and token management.
     """
 
-    def __init__(self, client_id: str, client_secret: str, redirect_uri: str):
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.redirect_uri = redirect_uri
+    def __init__(self):
+        dotenv.load_dotenv()
+        self.client_id = os.getenv("SPOTIFY_CLIENT_ID")
+        self.client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
+        self.redirect_uri = os.getenv("SPOTIFY_REDIRECT_URI")
 
         self.token_url = "https://accounts.spotify.com/api/token"
         self.access_token: Optional[str] = None
