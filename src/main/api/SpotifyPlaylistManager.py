@@ -40,7 +40,7 @@ class SpotifyPlaylistManager:
         Retrieve the user's playlists.
 
         Returns:
-            list: A list of dictionaries with 'id' and 'name' for each playlist.
+            list: A list of dictionaries with 'id', 'name' and 'playlist_image' for each playlist.
         """
         if not self.access_token:
             raise Exception("Access token is not available. Please authorize first.")
@@ -53,7 +53,7 @@ class SpotifyPlaylistManager:
             playlists = response.json().get("items", [])
             if not playlists:
                 logging.info(f"No playlists found. Full response: {response.json()}")
-            return [{"id": playlist["id"], "name": playlist["name"]} for playlist in playlists]
+            return [{"id": playlist["id"], "name": playlist["name"], "playlist_image": playlist["images"][0]["url"]} for playlist in playlists]
         elif response.status_code == 401:
             logging.error("Access token is invalid or expired. Please refresh or reauthorize.")
             logging.error(f"Full Response: {response.json()}")
