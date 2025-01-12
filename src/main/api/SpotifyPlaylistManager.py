@@ -35,6 +35,33 @@ class SpotifyPlaylistManager:
             logging.error(f"Failed to add tracks to playlist: {response.text}")
             raise Exception(f"Add to Playlist Error: {response.status_code}")
 
+    def get_playlists(self):
+        """
+        Retrieve the user's playlists.
+
+        Returns:
+            list: A list of dictionaries with 'id' and 'name' for each playlist.
+        """
+        if not self.access_token:
+            raise Exception("Access token is not available. Please authorize first.")
+
+        endpoint = f"{self.api_base_url}/me/playlists"
+        headers = {"Authorization": f"Bearer {self.access_token}"}
+
+        response = requests.get(endpoint, headers=headers)
+        if response.status_code == 200:
+            playlists = response.json().get("items", [])
+            if not playlists:
+                logging.info(f"No playlists found. Full response: {response.json()}")
+            return [{"id": playlist["id"], "name": playlist["name"]} for playlist in playlists]
+        elif response.status_code == 401:
+            logging.error("Access token is invalid or expired. Please refresh or reauthorize.")
+            logging.error(f"Full Response: {response.json()}")
+            raise Exception("Unauthorized: Invalid or expired token.")
+        else:
+            logging.error(f"Failed to retrieve playlists: {response.text}")
+            raise Exception(f"Get Playlists Error: {response.status_code}")
+
     @staticmethod
     def generate_link(spotify_id: str, type_: str = "track") -> str:
         """

@@ -4,19 +4,28 @@ import signal
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
-from flask import Flask, jsonify, Response
+from flask import Flask, jsonify, Response, request
+from flask_cors import CORS
 
 from main.api.sveriges_radio_api import SvergiesRadioApi
 from main.api.SpotifyAPI import SpotifyAPI
-from main.server.top_list_updater import TopListUpdater
+from main.server.history_updater import HistoryUpdater
+from main.api.SpotifyPlaylistManager import SpotifyPlaylistManager
 
 app = Flask(__name__)
+CORS(app)
 srAPI = SvergiesRadioApi()
 spotifyAPI = SpotifyAPI()
-top_list_updater = TopListUpdater()
+history_updater = HistoryUpdater()
+
+
 
 @app.route("/channels", methods=["GET"])
 def get_channels():
+    """
+    Returns information about all channels that are currently playing music in a JSON format.
+    """
+
     channels = srAPI.get_all_channels()
 
     if channels is None:
@@ -27,13 +36,65 @@ def get_channels():
 
     return jsonify(channels), 200
 
+@app.route("/channels/<int:channel_id>", methods=["GET"])
+def get_channel_history(channel_id):
+
+    #TODO WORK IN PROGRESS
+
+    """
+    Returns the song history in JSON format of the channel that was given as input parameter.
+    """
+
+    return
+
+@app.route("/user_playlists", methods=["GET"])
+def get_user_spotify_playlists():
+
+    """
+    Returns a list of all the playlists on the users spotify account in a JSON format.
+
+    Requires a spotify authentication code.
+    """
+
+    data = request.json
+    auth_code = data.get("auth_code")
+
+    spm = SpotifyPlaylistManager(auth_code)
+    playlists = spm.get_playlists()
+
+    if not auth_code:
+        return "400: Authorization code is required.", 400
+
+    return jsonify(playlists), 200
+
+@app.route("/add_song_to_playlist", methods=["POST"])
+def add_song_to_playlist():
+
+    """
+    Adds a song to the selected playlist on the users spotify account.
+
+    Requires a spotify authentication code.
+    """
+
+    data = request.json
+    auth_code = data.get("auth_code")
+    track_uris = data.get("track_uris")
+    playlist_id = data.get("playlist_idd")
+
+    if not auth_code:
+        return "400: Authorization code is required.", 400
+
+    spm = SpotifyPlaylistManager(auth_code)
+    spm.add_to_playlist(playlist_id, track_uris)
+
+    return 200
 
 @app.route("/")
 def hello_world():
-    return "<p>Diggaren API!</p>"
+    return "<p>Diggaren API!</p>", 200
 
 def handle_shutdown(signum, frame):
-    top_list_updater.stop()
+    history_updater.stop()
     sys.exit(0)
 
 if __name__ == '__main__':
@@ -45,6 +106,6 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         debug_status = True
     
-    top_list_updater.start()
+    history_updater.start()
 
     app.run(debug=debug_status, port=5001)

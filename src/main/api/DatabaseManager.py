@@ -2,6 +2,8 @@ import pymysql
 import logging
 from pymysql.cursors import DictCursor
 from typing import Optional, List, Dict
+from datetime import datetime, timedelta
+from src.main.models.track import Track
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger()
@@ -196,3 +198,47 @@ class DatabaseManager:
         """
         result = self._execute_query(query, (start_date, end_date))
         return result if result else []
+
+    def get_channel_id_by_name(self, channel_name: str) -> Optional[int]:
+        """
+        Retrieves the ChannelID for a given channel name.
+        """
+        query = "SELECT ChannelID FROM Channels WHERE Name = %s"
+        result = self._execute_query(query, (channel_name,), fetchone=True)
+        return result["ChannelID"] if result else None
+
+    def get_play_history_one_day_back(self, channel_identifier: str) -> List[Track]:
+        """
+        Retrieves play history one day back as Track objects for a specific channel.
+        Args:
+            channel_identifier (str): ChannelID or channel name.
+        Returns:
+            List[Track]: List of Track objects.
+        """
+        if channel_identifier.isdigit():
+            channel_id = int(channel_identifier)
+        else:
+            channel_id = self.get_channel_id_by_name(channel_identifier)
+            if not channel_id:
+                logger.error(f"Channel '{channel_identifier}' not found.")
+                return []
+
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=1)
+
+        query = """
+        SELECT t.TrackID, t.Title, t.Artist
+        FROM PlayHistory ph
+        JOIN Tracks t ON ph.SpotifyID = t.TrackID
+        WHERE ph.ChannelID = %s AND ph.Timestamp BETWEEN %s AND %s
+        ORDER BY ph.Timestamp DESC
+        """
+        results = self._execute_query(query, (channel_id, start_date, end_date))
+
+        tracks = [Track(
+            spotify_id=row["TrackID"],
+            song_title=row["Title"],
+            artist_name=row["Artist"],
+        ) for row in results] if results else []
+
+        return tracks
