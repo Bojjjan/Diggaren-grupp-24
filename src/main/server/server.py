@@ -7,11 +7,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"
 from flask import Flask, jsonify, Response, request
 from flask_cors import CORS
 
+from dotenv import load_dotenv
+
 from main.api.sveriges_radio_api import SvergiesRadioApi
 from main.api.SpotifyAPI import SpotifyAPI
 from main.server.history_updater import HistoryUpdater
 from main.api.SpotifyPlaylistManager import SpotifyPlaylistManager
 from main.api.DatabaseManager import DatabaseManager
+from main.api.SpotifyAuth import SpotifyAuth
+
 
 app = Flask(__name__)
 CORS(app)
@@ -19,6 +23,7 @@ srAPI = SvergiesRadioApi()
 spotifyAPI = SpotifyAPI()
 history_updater = HistoryUpdater()
 
+load_dotenv()
 
 
 @app.route("/channels", methods=["GET"])
@@ -95,6 +100,35 @@ def add_song_to_playlist():
     spm.add_to_playlist(playlist_id, track_list)
 
     return "Track successfully added.", 201
+
+@app.route("/spotify_url", methods=["GET"])
+def get_spotify_url():
+
+    client_id = os.getenv("SPOTIFY_CLIENT_ID", "")
+    client_secret = os.getenv("SPOTIFY_CLIENT_SECRET", "")
+    redirect_uri = os.getenv("SPOTIFY_REDIRECT_URI", "https://diggaren.tech/callback")
+
+    spotify_auth = SpotifyAuth(client_id, client_secret, redirect_uri)
+
+    scopes = [
+        "playlist-modify-public",
+        "playlist-modify-private",
+        "playlist-read-private",
+    ]
+
+    auth_url = spotify_auth.get_authorization_url(scopes)
+
+    return jsonify(auth_url), 200
+
+
+@app.route("/callback")
+def callback():
+    print("hello")
+    
+
+
+
+
 
 @app.route("/")
 def hello_world():

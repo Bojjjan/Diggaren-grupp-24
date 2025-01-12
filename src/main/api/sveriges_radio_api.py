@@ -83,6 +83,7 @@ class SvergiesRadioApi:
             response = requests.get((self._URL + "/playlists/rightnow"), params=self._PARAMS)
             response.raise_for_status()
             data = response.json()
+            has_p4 =  False
 
             try:
                 for channel in data["channels"]:
@@ -94,6 +95,14 @@ class SvergiesRadioApi:
                         for track in self._track_list:
                             if track.channel_id == channel["id"]: # Look for duplicate id
                                 skip = True
+
+
+                    if "P4" in channel["name"] and channel["id"] != 4951:
+                        if not has_p4:
+                            has_p4 = True
+                        else:
+                            continue
+
 
                     if not skip:
                         newtrack = Track()

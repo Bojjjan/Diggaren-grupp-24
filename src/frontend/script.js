@@ -111,3 +111,10 @@ function openModal(channelId) {
 }           
 
 document.addEventListener("DOMContentLoaded", listChannels);
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  listChannels();
+  setInterval(listChannels, 60000); // 60 seconds
+  console.log("Refresh")
+});
