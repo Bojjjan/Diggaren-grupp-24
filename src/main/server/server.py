@@ -11,6 +11,7 @@ from main.api.sveriges_radio_api import SvergiesRadioApi
 from main.api.SpotifyAPI import SpotifyAPI
 from main.server.history_updater import HistoryUpdater
 from main.api.SpotifyPlaylistManager import SpotifyPlaylistManager
+from main.api.DatabaseManager import DatabaseManager
 
 app = Flask(__name__)
 CORS(app)
@@ -39,13 +40,14 @@ def get_channels():
 @app.route("/channels/<int:channel_id>", methods=["GET"])
 def get_channel_history(channel_id):
 
-    #TODO WORK IN PROGRESS
-
     """
     Returns the song history in JSON format of the channel that was given as input parameter.
     """
 
-    return
+    dbm = DatabaseManager()
+    tracks = dbm.get_play_history_one_day_back(channel_id)
+
+    return jsonify(tracks), 200
 
 @app.route("/user_playlists", methods=["GET"])
 def get_user_spotify_playlists():
