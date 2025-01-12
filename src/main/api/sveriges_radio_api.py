@@ -116,27 +116,6 @@ class SvergiesRadioApi:
 
 
 
-    def debugg_print(self, list):
-        """
-        Print the details of each track in the provided list.
-
-        Args:
-            list (list): A list of Track objects to be printed.
-        """
-        for t in list:
-            print("#")
-            print("| ID:     ", t.channel_id)
-            print("| Name:   ", t.channel_name)
-            print("|")
-            print("| Song:   ", t.song_title)
-            print("| Artist:  ", t.artist_name)
-            print("| Start:   ", t.song_start)
-            print("| Stop:   ", t.song_stop)
-            print("|")
-            print("| Color:  ", t.channel_color)
-            print("| IMG:    ", t.channel_img)
-            print("# ")
-            print("\n\n")
 
 
 

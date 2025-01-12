@@ -33,7 +33,7 @@ class DatabaseManager:
         host = os.getenv("DB_HOST")
         user = os.getenv("DB_USER")
         password = os.getenv("DB_PASSWORD")
-        database = os.getenv("DB_DATABASE")
+        database = os.getenv("DB_NAME")
 
         self.connection = pymysql.connect(
             host=host,
@@ -224,10 +224,6 @@ class DatabaseManager:
         Returns:
             List[Track]: List of Track objects.
         """
-        channel_id = self.get_channel_id_by_name(channel_identifier)
-        if not channel_id:
-            logger.error(f"Channel '{channel_identifier}' not found.")
-            return []
 
         end_date = datetime.now()
         start_date = end_date - timedelta(days=1)
@@ -239,7 +235,7 @@ class DatabaseManager:
         WHERE ph.ChannelID = %s AND ph.Timestamp BETWEEN %s AND %s
         ORDER BY ph.Timestamp DESC
         """
-        results = self._execute_query(query, (channel_id, start_date, end_date))
+        results = self._execute_query(query, (channel_identifier, start_date, end_date))
 
         tracks = [Track(
             spotify_id=row["TrackID"],
