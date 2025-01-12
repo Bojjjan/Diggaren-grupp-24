@@ -1,4 +1,4 @@
-const baseURL = "http://127.0.0.1:5001/channels";
+const baseURL = "http://127.0.0.1:5000/channels";
 
 async function listChannels() {
   const options = {

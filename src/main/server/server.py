@@ -1,10 +1,13 @@
 import sys
 import os
 import signal
+import time
+import base64
+import requests
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
-from flask import Flask, jsonify, Response, request
+from flask import Flask, jsonify, Response, request, session
 from flask_cors import CORS
 
 from dotenv import load_dotenv
@@ -22,7 +25,7 @@ CORS(app)
 srAPI = SvergiesRadioApi()
 spotifyAPI = SpotifyAPI()
 history_updater = HistoryUpdater()
-
+temp_code = None
 load_dotenv()
 
 
@@ -101,6 +104,49 @@ def add_song_to_playlist():
 
     return "Track successfully added.", 201
 
+@app.route("/get_code",  methods=["GET"])
+def get_code():
+    global temp_code
+    counter = 0
+    while temp_code is None and counter < 10:
+        time.sleep(1)
+        print("Waiting for the variable to be declared...")
+        counter += 1
+
+
+    return {"code": temp_code}
+
+@app.route("/callback",  methods=["GET"])
+def callback():
+    global temp_code
+    temp_code = None
+    code = request.args.get('code')
+    if not code:
+        return 'Authorization code not found', 400
+
+    token_url = 'https://accounts.spotify.com/api/token'
+    headers = {
+        'Authorization': f'Basic {base64.b64encode(f"{os.getenv("SPOTIFY_CLIENT_ID")}:{os.getenv("SPOTIFY_CLIENT_SECRET")}".encode()).decode()}',
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    data = {
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': "http://localhost:5000/callback"
+    }
+
+    response = requests.post(token_url, headers=headers, data=data)
+    if response.status_code != 200:
+        return f'Error fetching access token: {response.text}', 400
+
+    token_data = response.json()
+    access_token = token_data.get('access_token')
+    if not access_token:
+        return 'Access token not found in response', 400
+
+    temp_code = access_token
+    return "Login succesfull. You can now close this window.", 200
+
 @app.route("/spotify_url", methods=["GET"])
 def get_spotify_url():
 
@@ -120,14 +166,12 @@ def get_spotify_url():
 
     return jsonify(auth_url), 200
 
+@app.route("/client_id", methods=["GET"])
+def get_client_id():
 
-@app.route("/callback")
-def callback():
-    print("hello")
-    
+    client_id = os.getenv("SPOTIFY_CLIENT_ID", "")
 
-
-
+    return {"client_id": client_id}, 200
 
 
 @app.route("/")
@@ -151,4 +195,4 @@ if __name__ == '__main__':
     
     history_updater.start()
 
-    app.run(debug=debug_status, port=5001)
+    app.run(debug=debug_status, port=5000)
