@@ -224,13 +224,10 @@ class DatabaseManager:
         Returns:
             List[Track]: List of Track objects.
         """
-        if channel_identifier.isdigit():
-            channel_id = int(channel_identifier)
-        else:
-            channel_id = self.get_channel_id_by_name(channel_identifier)
-            if not channel_id:
-                logger.error(f"Channel '{channel_identifier}' not found.")
-                return []
+        channel_id = self.get_channel_id_by_name(channel_identifier)
+        if not channel_id:
+            logger.error(f"Channel '{channel_identifier}' not found.")
+            return []
 
         end_date = datetime.now()
         start_date = end_date - timedelta(days=1)

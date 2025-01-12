@@ -18,19 +18,12 @@ class HistoryUpdater:
         self.stop_event = threading.Event()
         self.thread = None
 
-        load_dotenv()
-
-        self.db_host = os.getenv("DB_HOST")
-        self.db_user = os.getenv("DB_USER")
-        self.db_pass = os.getenv("DB_PASSWORD")
-        self.db_name = os.getenv("DB_NAME")
-
     
     def update_history(self):
         while not self.stop_event.is_set():
             db = None
             try:
-                db = DatabaseManager(self.db_host, self.db_user, self.db_pass, self.db_name)
+                db = DatabaseManager()
                 spotify_api = SpotifyAPI()
 
                 logger.info("HistoryUpdater: Fetching channels from Sveriges Radio...")
