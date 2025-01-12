@@ -18,4 +18,3 @@ REM Run the Python script with the current directory as an argument
 python "%script_dir%" "%cd%"
 
 endlocal
-pause
