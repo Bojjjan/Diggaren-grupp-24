@@ -61,6 +61,9 @@ class SpotifyAuth:
         if response.status_code == 200:
             tokens = response.json()
             self.access_token = tokens["access_token"]
+            print("***ACCESS TOKEN***")
+            print(self.access_token)
+            print("***ACCESS TOKEN***")
             self.refresh_token = tokens["refresh_token"]
             logging.info("Access and refresh tokens successfully retrieved.")
         else:

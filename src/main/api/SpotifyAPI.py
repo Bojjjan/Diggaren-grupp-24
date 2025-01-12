@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 from typing import List, Dict, Optional
 import logging
 from datetime import datetime, timedelta
-
-from main.models.track import Track
+from models.track import Track
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 

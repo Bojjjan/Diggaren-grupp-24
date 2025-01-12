@@ -1,5 +1,5 @@
-from main.models.track import Track
-from src.main.api.SpotifyAPI import SpotifyAPI
+from models.track import Track
+from api.SpotifyAPI import SpotifyAPI
 
 if __name__ == "__main__":
     spotify_api = SpotifyAPI()
