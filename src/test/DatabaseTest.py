@@ -1,5 +1,6 @@
 import logging
-from api.DatabaseManager import DatabaseManager
+
+from src.main.api.DatabaseManager import DatabaseManager
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger()

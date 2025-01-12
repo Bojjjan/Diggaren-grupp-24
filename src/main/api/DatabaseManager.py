@@ -1,11 +1,12 @@
 import os
+
 import dotenv
 import pymysql
 import logging
 from pymysql.cursors import DictCursor
 from typing import Optional, List, Dict
 from datetime import datetime, timedelta
-from models.track import Track
+from main.models.track import Track
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger()

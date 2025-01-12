@@ -2,9 +2,9 @@ import requests
 from flask import Flask, request
 import os
 from dotenv import load_dotenv
-from main.api import SpotifyAuth
-from main.api import SpotifyPlaylistManager
-from main.api import SpotifyDeveloperDashboardAPI
+from main.api.SpotifyAuth import SpotifyAuth
+from main.api.SpotifyPlaylistManager import SpotifyPlaylistManager
+from main.api.SpotifyDeveloperDashboardAPI import SpotifyDeveloperDashboardAPI
 import threading
 import time
 import logging

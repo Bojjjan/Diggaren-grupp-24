@@ -4,14 +4,14 @@ import signal
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, Response, request
 from flask_cors import CORS
 
-from api.sveriges_radio_api import SvergiesRadioApi
-from api.SpotifyAPI import SpotifyAPI
-from server.history_updater import HistoryUpdater
-from api.SpotifyPlaylistManager import SpotifyPlaylistManager
-from api.DatabaseManager import DatabaseManager
+from main.api.sveriges_radio_api import SvergiesRadioApi
+from main.api.SpotifyAPI import SpotifyAPI
+from main.server.history_updater import HistoryUpdater
+from main.api.SpotifyPlaylistManager import SpotifyPlaylistManager
+from main.api.DatabaseManager import DatabaseManager
 
 app = Flask(__name__)
 CORS(app)

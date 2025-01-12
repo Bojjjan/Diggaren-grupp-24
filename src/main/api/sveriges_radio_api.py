@@ -1,6 +1,6 @@
 import logging
 
-from models.track import Track
+from main.models.track import Track
 from typing import List
 import requests
 
