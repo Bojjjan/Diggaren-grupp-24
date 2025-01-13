@@ -5,7 +5,6 @@
 
 .cover-container a:hover {
   text-decoration: none !important; 
-
 }
 
 .nav-masthead .nav-link {
@@ -68,7 +67,6 @@
 .btn-bd-primary {
   --bd-violet-bg: #712cf9;
   --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
-
   --bs-btn-font-weight: 600;
   --bs-btn-color: var(--bs-white);
   --bs-btn-bg: var(--bd-violet-bg);
@@ -228,5 +226,39 @@ header.mb-auto nav {
 .checkMark{
   width: 2rem;
   height: 2rem;
+}
+
+
+.w-modal {
+  max-width: 800px; 
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  text-align: center;
+  font-weight: bold;
+  text-align: center;
+}
+
+.modal-header .modal-title {
+  margin: 0 auto; 
+  font-size: 1.5rem; 
+  font-weight: bold; 
+}
+
+#previous-songs-list li {
+  margin-bottom: 10px; 
+  line-height: 1.5;    
+  font-size: 1rem;     
+}
+
+#previous-songs-list li strong {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+#previous-songs-list li span {
+  color: #bbb; 
+  font-style: italic;
 }
 
