@@ -181,13 +181,6 @@ function statusMessageModal(title, text) {
   modal.show();
 }
 
-function openModal(channelId) {
-  const previousSongs = [{ title: "Låt-namn", artist: "Artist-namn" }];
-
-  const label = document.getElementById("previousSongsModalLabel");
-  label.innerHTML = "Previous Songs";
-}
-
 /**
 Öppnar upp en popupruta som visar tidigare spelade låtar på den vadla radiokanalen.
 */
@@ -204,6 +197,7 @@ async function openModal(channelId, channelName) {
     const history = await response.json();
     songList.replaceChildren();
     history.forEach(function (song) {
+
       const listItem = document.createElement("li");
       let title = "Unknown Title";
       if (song.song_title) {
@@ -214,11 +208,7 @@ async function openModal(channelId, channelName) {
       if (song.artist_name) {
         artist = song.artist_name;
       }
-      listItem.innerHTML =
-        "<strong>Song: </strong>" +
-        title +
-        " <strong>| Artist: </strong>" +
-        artist;
+      listItem.innerHTML ="<strong>Song: </strong>" + title + " <strong>| Artist: </strong>" + artist;
       songList.appendChild(listItem);
     });
   } else {
