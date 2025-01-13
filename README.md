@@ -36,9 +36,9 @@ git clone https://github.com/Bojjjan/Diggaren-grupp-24.git
 <br>
 
 ### 3. Open the Start Script
-Open ```Diggaren-grupp-24``` folder and the run the appropriate script based on your operating system: <br>
-Windows: ```start.bat``` <br>
-Mac/Linux: ```start.sh```
+Navigate to the ```Diggaren-grupp-24``` folder and run the appropriate script based on your operating system: <br>
+* Windows: ```start.bat``` <br>
+* Mac/Linux: ```start.sh```
 
 
 > [!NOTE]
@@ -56,18 +56,62 @@ Mac/Linux: ```start.sh```
 <br>
 
 
-### Alternative: Setting Up a Virtual Environment
-To manually set up the environment:
-1. Navigate to the project folder:
+## Manual installation
+Follow steps "1. Install Python" and "2. Clone the Repository" as outlined above. <br>
+Then open the  ```Diggaren-grupp-24``` folder and open a terminal in that folder. <br>
+
+> [!NOTE]
+> On Windows, open Command Prompt.
+
+
+### 3. Creating a virtual environment
+
+#### Step 1: Create and activate virtual environment
+Run the following to create and activate the virtual environment: <br>
+Windows (Command Prompt)
 ```bash
- cd /path/to/project
+ python -m venv venv
+ venv\Scripts\Activate
+
 ```
-2. Run the setup script:
+
+> [!IMPORTANT]
+> On some Windows machines the script above does not work. Then run this script:
+>```bash
+>Set-ExecutionPolicy Unrestricted -Scope Process
+>python -m venv .venv
+>.venv/scripts/activate
+>
+>```
+
+<br>
+
+macOS/ Linux:
 ```bash
- python setup_env.py
+ python -m venv venv
+ source venv/bin/activate
+
 ```
-3. Install dependencies:
+> [!NOTE]
+> If everything is done correctly, ```(venv)``` should appear in the command line prompt.
+
+
+#### Step 2: Installing dependencies
+Once the virtual environment is active, install the required dependencies:
 ```bash
- pip install -e .
+ pip install -r requirements.txt
 ```
-All required packages and dependencies are now installed.
+<br>
+
+### 4. start the server
+With the virtual environment still active, start the server by running:
+```bash
+ python src\main\server\server.py
+```
+### 5. start the website
+Once the server is running, open a new terminal window, navigate to the ```Diggaren-grupp-24```  folder, and run the following to open the frontend in your browser::
+```bash
+ src\frontend\index.html
+```
+
+A web browser should open, and the application will be running.
