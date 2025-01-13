@@ -110,11 +110,13 @@ async function listChannels() {
 
 function showPlaylist(songid){
   if(!loggedIn){
-    openNotLoggedInModal()
+    statusMessageModal("Not logged in.", "Please log in and try again.")
+    return
+  }else if (Object.keys(playlists).length === 0){
+    statusMessageModal("No playlist found", "There are no playlists available.")
     return
   }
 
-  
   const label = document.getElementById("previousSongsModalLabel")
   label.innerHTML = "Select Playlist"
 
@@ -142,13 +144,12 @@ function showPlaylist(songid){
     playlistName.classList.add("playlistName");
     playlistName.innerHTML = playlist.name;
 
-    //section.textContent = `${song.title} - ${song.artist}`;
     section.appendChild(playlistImg);
     section.appendChild(playlistName);
     playlistsSection.appendChild(section);
 
     section.addEventListener("click", () => {
-        add_song_to_playlist(playlist.id, songid)
+        add_song_to_playlist(playlist.id, songid, playlist.name)
     })
 
   });
@@ -157,13 +158,13 @@ function showPlaylist(songid){
   modal.show();
 }
 
-function openNotLoggedInModal() {  
+function statusMessageModal(title, text) {  
 
   const label = document.getElementById("previousSongsModalLabel")
-  label.innerHTML = "Not logged in."
+  label.innerHTML = title;
 
   const songList = document.getElementById("previous-songs-list");
-  songList.innerHTML = "Please log in and try again."; 
+  songList.innerHTML = text; 
 
   const modal = new bootstrap.Modal(document.getElementById("previousSongsModal"));
   modal.show();

@@ -4,7 +4,7 @@ const redirectUri = "http://localhost:5000/callback"
 const getCodeUrl = "http://127.0.0.1:5000/get_code"
 const addSongToPlaylistUrl = "http://127.0.0.1:5000/add_song_to_playlist"
 
-const scopes = ["user-read-private", "user-read-email", "playlist-modify-public", "playlist-modify-private"];
+const scopes = ["user-read-private", "user-read-email", "playlist-modify-public", "playlist-modify-private", "playlist-read-private", "playlist-read-collaborative"];
 const options = { method: "GET"};
 const optionsPost = { method: "POST"};
 const loginBtn = document.getElementById("spotify_login_btn")
@@ -45,14 +45,48 @@ async function get_client_id() {
  * Sends a request to the server to add the specified song to the users specified playlist.
  */
 
-async function add_song_to_playlist(playlistID, songID) {
-    console.log(playlistID, "TEST", songID);
+async function add_song_to_playlist(playlistID, songID, nameOfPlaylist) {
+    songID = "spotify:track:"+songID
     const response = await fetch(`${addSongToPlaylistUrl}?access_token=${encodeURIComponent(client_token)}&track_uris=${encodeURIComponent(songID)}&playlist_id=${encodeURIComponent(playlistID)}`, {
         method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        }
     });
 
-    const data = await response.json();
-    console.log(data);
+    
+    if (!response.ok) {
+        console.error(`Error: ${response.status} ${response.statusText}`);
+        return;
+    }else {
+
+        const section = document.createElement("div");
+        section.classList.add("notification");
+
+        const notificationMessage = document.createElement("p")
+        notificationMessage.classList.add("message");
+        notificationMessage.innerHTML = "Song added to " + nameOfPlaylist;
+
+        const checkMark = document.createElement("img");
+        checkMark.classList.add("checkMark");
+        checkMark.src = "check_circle.svg"
+
+        section.appendChild(checkMark);
+        section.appendChild(notificationMessage);
+        document.body.appendChild(section);
+
+        
+        setTimeout(() => {
+            section.classList.add("fade-out");
+        }, 2000);
+
+        
+        setTimeout(() => {
+            section.remove();
+        }, 3000);
+        
+    }
+
 }
 
 /**
@@ -65,7 +99,6 @@ async function get_playlists() {
     data.forEach(element => {
         const playlist = new Playlist(element.name, element.id, element.playlist_image)
         playlists.push(playlist)
-        console.log("Playlist added: " + playlist.name)
     });
 }
 

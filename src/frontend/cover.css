@@ -198,3 +198,35 @@ header.mb-auto nav {
   margin-left: 10px;
   font-size: 1.5rem;
 }
+
+.notification {
+  display: flex;
+  width: auto;
+  height: auto;
+  padding: 1.5rem;
+  position: fixed;
+  bottom: 10px;
+  background-color: rgba(16, 111, 35, 0.33);
+  color: white;
+  align-items: center; 
+  justify-content: center;
+  border-radius: 5px;
+  z-index: 2000;
+  transition: opacity 1s ease-in-out;
+}
+
+.notification.fade-out {
+  opacity: 0;
+}
+
+.message{
+  font-size: 1.2rem;
+  margin-bottom: 0;
+  margin-left: 8px;
+}
+
+.checkMark{
+  width: 2rem;
+  height: 2rem;
+}
+
