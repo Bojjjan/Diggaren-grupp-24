@@ -1,9 +1,9 @@
 const baseURL = "http://127.0.0.1:5000/channels";
 
 /**
-Hämtar en lista över radiokanaler via en GET-metod och visar dem i gränssnittet med dynamiskt skapade HTML-element. 
-Visar radiokanal-bild, albumomslag, låttitel och artistnamn.
- */
+* Fetches a list of radio channels via a GET method and displays them in the interface with dynamically created HTML elements.
+* Displays radio channel image, album cover, song title, and artist name.
+*/
 async function listChannels() {
   const options = {
     method: "GET",
@@ -115,7 +115,9 @@ async function listChannels() {
     container.appendChild(colDiv);
   });
 }
-
+/**
+ * Shows all avalible playlist in your spotify account in a popup.
+ */
 function showPlaylist(songid) {
   if (!loggedIn) {
     statusMessageModal("Not logged in.", "Please log in and try again.");
@@ -168,6 +170,9 @@ function showPlaylist(songid) {
   modal.show();
 }
 
+/**
+ * shows a popup for status message
+ */
 function statusMessageModal(title, text) {
   const label = document.getElementById("previousSongsModalLabel");
   label.innerHTML = title;
@@ -182,7 +187,7 @@ function statusMessageModal(title, text) {
 }
 
 /**
-Öppnar upp en popupruta som visar tidigare spelade låtar på den vadla radiokanalen.
+*  Opens a popup window that shows previously played songs on the selected radio channel.
 */
 async function openModal(channelId, channelName) {
   const modalTitle = document.getElementById("previousSongsModalLabel");
@@ -220,6 +225,7 @@ async function openModal(channelId, channelName) {
 }
 
 document.addEventListener("DOMContentLoaded", listChannels);
+
 
 document.addEventListener("DOMContentLoaded", () => {
   listChannels();
