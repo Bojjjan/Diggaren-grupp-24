@@ -97,10 +97,8 @@ async function listChannels() {
 
 
     addSongBtn.addEventListener("click", (event) => {
-      event.stopPropagation(); 
-      const id = channel.spotify_id;
-      console.log(`Button clicked for song: ${id}`);
-      showPlaylist()
+      event.stopPropagation();
+      showPlaylist(channel.spotify_id);
     });
 
     radioContentDiv.addEventListener("click", () => openModal(channel.id)); 
@@ -110,15 +108,15 @@ async function listChannels() {
   });
 }
 
-function showPlaylist(){
-  let defaultImg = "defaultChannel.JPEG";
-  const playlists = [
-    { imgSrc: "Spellista", name: "artismsdfaköldj" },
-  ];
+function showPlaylist(songid){
+  if(!loggedIn){
+    openNotLoggedInModal()
+    return
+  }
 
+  
   const label = document.getElementById("previousSongsModalLabel")
   label.innerHTML = "Select Playlist"
-
 
   const playlistsSection = document.getElementById("previous-songs-list");
   playlistsSection.innerHTML = ""; 
@@ -126,16 +124,22 @@ function showPlaylist(){
   
 
   playlists.forEach((playlist) => {
+    let defaultImg = "defaultChannel.JPEG";
+
     const section = document.createElement("div");
     section.classList.add("playlistSection");
 
     const playlistImg = document.createElement("img");
     playlistImg.classList.add("playlistImg");
     
+    if(playlist.image){
+      defaultImg = playlist.image
+    }
 
-    playlistImg.src = defaultImg;
+    playlistImg.src = playlist.image;
 
     const playlistName = document.createElement("p");
+    playlistName.classList.add("playlistName");
     playlistName.innerHTML = playlist.name;
 
     //section.textContent = `${song.title} - ${song.artist}`;
@@ -144,7 +148,7 @@ function showPlaylist(){
     playlistsSection.appendChild(section);
 
     section.addEventListener("click", () => {
-        add_song_to_playlist()
+        add_song_to_playlist(playlist.id, songid)
     })
 
   });
@@ -152,6 +156,18 @@ function showPlaylist(){
   const modal = new bootstrap.Modal(document.getElementById("previousSongsModal"));
   modal.show();
 }
+
+function openNotLoggedInModal() {  
+
+  const label = document.getElementById("previousSongsModalLabel")
+  label.innerHTML = "Not logged in."
+
+  const songList = document.getElementById("previous-songs-list");
+  songList.innerHTML = "Please log in and try again."; 
+
+  const modal = new bootstrap.Modal(document.getElementById("previousSongsModal"));
+  modal.show();
+}           
 
 
 function openModal(channelId) {  

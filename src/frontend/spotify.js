@@ -2,13 +2,17 @@ const client_id_url = "http://127.0.0.1:5000/client_id";
 const playlist_url = "http://127.0.0.1:5000/user_playlists"
 const redirectUri = "http://localhost:5000/callback"
 const getCodeUrl = "http://127.0.0.1:5000/get_code"
+const addSongToPlaylistUrl = "http://127.0.0.1:5000/add_song_to_playlist"
 
-const scopes = ["user-read-private", "user-read-email"];
+const scopes = ["user-read-private", "user-read-email", "playlist-modify-public", "playlist-modify-private"];
 const options = { method: "GET"};
+const optionsPost = { method: "POST"};
 const loginBtn = document.getElementById("spotify_login_btn")
 const logoutBtn = document.getElementById("logout_btn")
 let clientId = "";
 let client_token = ""
+
+
 let playlists = []
 let loggedIn = false
 
@@ -41,8 +45,14 @@ async function get_client_id() {
  * Sends a request to the server to add the specified song to the users specified playlist.
  */
 
-async function add_song_to_playlist(){
+async function add_song_to_playlist(playlistID, songID) {
+    console.log(playlistID, "TEST", songID);
+    const response = await fetch(`${addSongToPlaylistUrl}?access_token=${encodeURIComponent(client_token)}&track_uris=${encodeURIComponent(songID)}&playlist_id=${encodeURIComponent(playlistID)}`, {
+        method: "POST",
+    });
 
+    const data = await response.json();
+    console.log(data);
 }
 
 /**
@@ -53,7 +63,7 @@ async function get_playlists() {
     const data = await response.json();
     
     data.forEach(element => {
-        const playlist = new Playlist(element.name, element.id, element.image)
+        const playlist = new Playlist(element.name, element.id, element.playlist_image)
         playlists.push(playlist)
         console.log("Playlist added: " + playlist.name)
     });
