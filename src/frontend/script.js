@@ -1,5 +1,9 @@
 const baseURL = "http://127.0.0.1:5001/channels";
 
+/**
+Hämtar en lista över radiokanaler via en GET-metod och visar dem i gränssnittet med dynamiskt skapade HTML-element. 
+Visar radiokanal-bild, albumomslag, låttitel och artistnamn.
+ */
 async function listChannels() {
   const options = {
     method: "GET",
@@ -10,8 +14,8 @@ async function listChannels() {
 
   const response = await fetch(baseURL, options);
   const channels = await response.json();
-  const container = document.querySelector(".container .row"); 
-  container.replaceChildren(); 
+  const container = document.querySelector(".container .row");
+  container.replaceChildren();
 
   channels.forEach((channel) => {
     const colDiv = document.createElement("div");
@@ -30,7 +34,7 @@ async function listChannels() {
     }
     channelImage.setAttribute("src", imageSrc);
 
-    let imageAlt = "No channel image available";
+    let imageAlt = "No image available";
     if (channel.channel_name) {
       imageAlt = channel.channel_name;
     }
@@ -49,12 +53,11 @@ async function listChannels() {
     }
     albumImage.setAttribute("src", albumSrc);
 
-    let albumAlt = "No album image available";
+    let albumAlt = "No image available";
     if (channel.song_title) {
       albumAlt = channel.song_title;
     }
     albumImage.setAttribute("alt", albumAlt);
-
     albumImage.setAttribute("width", "75");
     albumImage.setAttribute("height", "75");
     albumCoverDiv.appendChild(albumImage);
@@ -80,34 +83,51 @@ async function listChannels() {
 
     songInfoDiv.appendChild(songName);
     songInfoDiv.appendChild(artistName);
-
     radioContentDiv.appendChild(channelImageDiv);
     radioContentDiv.appendChild(albumCoverDiv);
     radioContentDiv.appendChild(songInfoDiv);
-
-    radioContentDiv.addEventListener("click", () => openModal(channel.id)); 
-
+    radioContentDiv.addEventListener("click", () => openModal(channel.channel_id, channel.channel_name));
     colDiv.appendChild(radioContentDiv);
     container.appendChild(colDiv);
   });
 }
 
-function openModal(channelId) {  
-  const previousSongs = [
-    { title: "Låt-namn", artist: "Artist-namn" },
-  ];
-
+/**
+Öppnar upp en popupruta som visar tidigare spelade låtar på den vadla radiokanalen.
+*/
+async function openModal(channelId, channelName) {
+  const modalTitle = document.getElementById("previousSongsModalLabel");
   const songList = document.getElementById("previous-songs-list");
-  songList.innerHTML = ""; 
+  const modalElement = document.getElementById("previousSongsModal");
+  modalTitle.textContent = channelName + " - Previous Songs";
 
-  previousSongs.forEach((song) => {
-    const listItem = document.createElement("li");
-    listItem.textContent = `${song.title} - ${song.artist}`;
-    songList.appendChild(listItem);
-  });
+  const apiUrl = baseURL + "/" + channelId;
+  const response = await fetch(apiUrl, { method: "GET" });
 
-  const modal = new bootstrap.Modal(document.getElementById("previousSongsModal"));
+  if (response.ok) {
+    const history = await response.json();
+    songList.replaceChildren();
+    history.forEach(function (song) {
+
+      const listItem = document.createElement("li");
+      let title = "Unknown Title";
+      if (song.song_title) {
+        title = song.song_title;
+      }
+
+      let artist = "Unknown Artist";
+      if (song.artist_name) {
+        artist = song.artist_name;
+      }
+      listItem.innerHTML = "<strong>Song: </strong>" + title + " <strong>| Artist: </strong>" + artist;
+      songList.appendChild(listItem);
+    });
+  } else {
+    songList.innerHTML = "<li>Could not load channel history.</li>";
+  }
+
+  const modal = new bootstrap.Modal(modalElement);
   modal.show();
-}           
+}
 
 document.addEventListener("DOMContentLoaded", listChannels);
