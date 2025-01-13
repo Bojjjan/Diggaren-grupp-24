@@ -12,6 +12,10 @@ let client_token = ""
 let playlists = []
 let loggedIn = false
 
+
+/**
+ * This function fetches the Spotify user token from the server.
+ */
 async function get_code() {
 
     const response = await fetch(getCodeUrl, options);
@@ -23,17 +27,27 @@ async function get_code() {
     }
 }
 
+
+/**
+ * This function fetches the client_id from the server.
+ */
 async function get_client_id() {
     const response = await fetch(client_id_url, options);
     const data = await response.json();
     clientId = data.client_id
 }
 
+/**
+ * Sends a request to the server to add the specified song to the users specified playlist.
+ */
+
 async function add_song_to_playlist(){
 
 }
 
-
+/**
+ * This function fetches the users playlist from the server and adds them to the "playlists" list.
+ */
 async function get_playlists() {
     const response = await fetch(playlist_url+"?access_token="+client_token, options);
     const data = await response.json();
@@ -45,7 +59,11 @@ async function get_playlists() {
     });
 }
 
-function activateLogin(){
+/**
+ * Sets up the login button to function properly.
+ */
+
+function setupLogin(){
     loginBtn.addEventListener("click", async () => {
         if(!loggedIn){
             await get_client_id()
@@ -60,7 +78,11 @@ function activateLogin(){
     });
 }
 
-function activateLogout(){
+
+/**
+ * Sets up the logout button to function properly.
+ */
+function setupLogout(){
     logoutBtn.style.visibility = "hidden";
     logoutBtn.addEventListener("click", async () => {
         if(loggedIn){
@@ -74,9 +96,13 @@ function activateLogout(){
     })
 }
 
-activateLogin()
-activateLogout()
+setupLogin()
+setupLogout()
 
+
+/**
+ * This class is used to save data about a playlist.
+ */
 class Playlist{
     constructor(name, id, image){
         this.name = name
