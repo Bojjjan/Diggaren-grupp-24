@@ -2,6 +2,7 @@
   <h1><strong>🎧 Diggaren 🎷</strong></h1>
 </div>
 
+
 ## About
 **Diggaren** is a tool that enhances your radio listening experience by connecting Sveriges Radio and Spotify. Here's what it does:  
 - Displays the currently playing song on Sveriges Radio.  
@@ -14,8 +15,12 @@ This project was developed as part of a school assignment to explore APIs and bu
 <br>
 
 ## Getting Started
-
 Follow these steps to get started with Diggaren:
+> [!IMPORTANT]
+> This application is only tested for Windows. <br> There is no guarantee that this program will work on Linux/mac
+
+> [!Warning]
+> There have been reports of adblockers like Ublock orgin blocking the connection between webbrowser and server
 
 ### 1. Install Python
 Ensure that Python 3.12 or higher is installed. <br>You can download it from the official Python website:
@@ -36,6 +41,7 @@ git clone https://github.com/Bojjjan/Diggaren-grupp-24.git
 <br>
 
 ### 3. Open the Start Script
+(If this script does not work, go to the manual installation.) <br>
 Navigate to the ```Diggaren-grupp-24``` folder and run the appropriate script based on your operating system: <br>
 * Windows: ```start.bat``` <br>
 * Mac/Linux: ```start.sh```
