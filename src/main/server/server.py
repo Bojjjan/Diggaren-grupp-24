@@ -137,10 +137,13 @@ def callback():
     code = request.args.get('code')
     if not code:
         return 'Authorization code not found', 400
+    
+    client_credentials = f"{os.getenv('SPOTIFY_CLIENT_ID')}:{os.getenv('SPOTIFY_CLIENT_SECRET')}"
+    encoded_credentials = base64.b64encode(client_credentials.encode()).decode()
 
     token_url = 'https://accounts.spotify.com/api/token'
     headers = {
-        'Authorization': f'Basic {base64.b64encode(f"{os.getenv("SPOTIFY_CLIENT_ID")}:{os.getenv("SPOTIFY_CLIENT_SECRET")}".encode()).decode()}',
+        'Authorization': f'Basic {encoded_credentials}',
         'Content-Type': 'application/x-www-form-urlencoded'
     }
     data = {
