@@ -12,6 +12,10 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+"""
+This class is used for keeping the database updated with all the songs that have been playing on the channels.
+"""
+
 class HistoryUpdater:
     def __init__(self):
         self.sveriges_radio_api = SvergiesRadioApi()
@@ -20,6 +24,12 @@ class HistoryUpdater:
 
     
     def update_history(self):
+        """
+        This method is used for updating the database with all the played songs. 
+        
+        It checks the currently playing songs once per minute and adds it to the database.
+        """
+
         while not self.stop_event.is_set():
             db = None
             try:
@@ -64,11 +74,20 @@ class HistoryUpdater:
             time.sleep(60)
 
     def start(self):
+        """
+        Starts the history_updater thread.
+        """
+
+
         self.thread = threading.Thread(target=self.update_history, name="HistoryUpdaterThread")
         self.thread.start()
         logger.info("HistoryUpdater: Thread started.")
 
     def stop(self):
+        """
+        Stops the history updater thread.
+        """
+
         self.stop_event.set()
         if self.thread is not None:
             self.thread.join()

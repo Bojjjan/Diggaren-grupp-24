@@ -109,6 +109,11 @@ def add_song_to_playlist():
 
 @app.route("/get_code",  methods=["GET"])
 def get_code():
+    """
+    This method is only used when a user is logging into their Spotify account. 
+    It's called directly after /callback to send back the user token.
+    """
+
     global temp_code
     counter = 0
     while temp_code is None and counter < 10:
@@ -121,6 +126,12 @@ def get_code():
 
 @app.route("/callback",  methods=["GET"])
 def callback():
+    """
+    This API call is only used when a user is logging into their Spotify account. It's used by the spotify login API
+    as a callback to when the user has logged in. It saves the users token in the variable temp_code which is then
+    fetched by the website via /get_code.
+    """
+
     global temp_code
     temp_code = None
     code = request.args.get('code')
@@ -152,6 +163,10 @@ def callback():
 
 @app.route("/spotify_url", methods=["GET"])
 def get_spotify_url():
+    """
+    This function is used to get a spotify login url.
+    """
+
 
     client_id = os.getenv("SPOTIFY_CLIENT_ID", "")
     client_secret = os.getenv("SPOTIFY_CLIENT_SECRET", "")
@@ -171,7 +186,9 @@ def get_spotify_url():
 
 @app.route("/client_id", methods=["GET"])
 def get_client_id():
-
+    """
+    This function is used to get the Spotify clientID.
+    """
     client_id = os.getenv("SPOTIFY_CLIENT_ID", "")
 
     return {"client_id": client_id}, 200
@@ -182,11 +199,16 @@ def hello_world():
     return "<p>Diggaren API!</p>", 200
 
 def handle_shutdown(signum, frame):
+    """
+    Handles the shutdown of the server by stopping the history_updater thread so the server stops correctly.
+    """
     history_updater.stop()
     sys.exit(0)
 
 
-
+    """
+    This code handles the startup of the server. It also starts the history_updater thread. 
+    """
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handle_shutdown)
     signal.signal(signal.SIGTERM, handle_shutdown)
